@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DialogNoPaddingNoTitle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="DarkActionBarTheme" parent="Theme.MaterialComponents.DayNight">
+        <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
+
+    </style>
+
+    <style name="OverFlow">
+        <item name="android:src">@drawable/ic_menu</item>
+    </style>
+</resources>

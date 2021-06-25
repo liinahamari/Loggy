@@ -1,0 +1,3 @@
+rootProject.name = "Loggy"
+include ':loggy_sdk'
+include ':sample'
