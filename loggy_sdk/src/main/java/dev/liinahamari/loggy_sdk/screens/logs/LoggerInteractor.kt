@@ -19,6 +19,7 @@ package dev.liinahamari.loggy_sdk.screens.logs
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
+import dev.liinahamari.loggy_sdk.BuildConfig
 import dev.liinahamari.loggy_sdk.helper.DATE_PATTERN_FOR_LOGGING
 import dev.liinahamari.loggy_sdk.helper.createFileIfNotExist
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
@@ -36,7 +37,7 @@ import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
 /** Refers to <provider>'s authority in AndroidManifest.xml*/
-const val FILE_PROVIDER_META = ".1fileprovider"
+const val FILE_PROVIDER_META = ".fileprovider"
 const val ZIPPED_LOGS_FILE_NAME = "logs.zip"
 
 /** Be sure what it is matching pattern in use of FlightRecorder class*/
@@ -105,7 +106,7 @@ internal class LoggerInteractor @Inject constructor(
         .onErrorReturn { ClearRecordResult.IOError }
         .startWithItem(ClearRecordResult.InProgress)
 
-    fun createZippedLogsFile(): Observable<CreateZipLogsFileResult> = Observable.just(/*BuildConfig.LIBRARY_PACKAGE_NAME */ applicationContext.packageName + FILE_PROVIDER_META)
+    fun createZippedLogsFile(): Observable<CreateZipLogsFileResult> = Observable.just(BuildConfig.LIBRARY_PACKAGE_NAME + FILE_PROVIDER_META)
         .map { authority ->
             val zippedLogs = applicationContext.createFileIfNotExist(ZIPPED_LOGS_FILE_NAME, DEBUG_LOGS_DIR)
             ZipOutputStream(BufferedOutputStream(FileOutputStream(zippedLogs))).use { output ->
