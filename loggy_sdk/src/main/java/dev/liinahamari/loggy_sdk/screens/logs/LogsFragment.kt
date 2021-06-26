@@ -36,7 +36,7 @@ import dev.liinahamari.loggy_sdk.helper.throttleFirst
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_logs.*
 
-private const val FILE_SENDING_REQUEST_CODE = 111
+private const val FILE_SENDING_REQUEST_CODE = 1011010
 private const val TEXT_TYPE = "text/plain"
 
 class LogsFragment : BaseFragment(R.layout.fragment_logs) {
@@ -95,7 +95,11 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
         viewModel.logFilePathEvent.observe(this, {
             Intent(Intent.ACTION_SEND).apply {
                 putExtra(Intent.EXTRA_EMAIL, arrayOf(integratorsEmail))
-                putExtra(Intent.EXTRA_SUBJECT, String.format(getString(R.string.subject), requireActivity().applicationInfo.name))
+                putExtra(
+                    Intent.EXTRA_SUBJECT, String.format(
+                        getString(R.string.subject), userId, requireActivity().applicationInfo.name
+                    )
+                )
                 putExtra(Intent.EXTRA_STREAM, it)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 type = TEXT_TYPE

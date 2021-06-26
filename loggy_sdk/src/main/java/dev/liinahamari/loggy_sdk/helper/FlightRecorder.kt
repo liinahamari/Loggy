@@ -19,7 +19,10 @@ package dev.liinahamari.loggy_sdk.helper
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import dev.liinahamari.loggy_sdk.BuildConfig
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Scheduler
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
@@ -59,12 +62,16 @@ class FlightRecorder private constructor() {
         fun printLogAndWriteToFile(
             logMessage: String,
             priority: Priority,
-            toPrintInLogcat: Boolean
+            toPrintInLogcat: Boolean,
+            observeOn: Scheduler = AndroidSchedulers.mainThread(),
+            subscribeOn: Scheduler = Schedulers.io()
         ) {
             with(logMessage.toLogMessage(priority)) {
                 clearBeginningOfLogFileIfNeeded(this)
 
                 Completable.fromCallable { logStorage.appendText(this) }
+                    .subscribeOn(subscribeOn)
+                    .observeOn(observeOn)
                     .timeout(5, TimeUnit.SECONDS)
                     .subscribe()
 

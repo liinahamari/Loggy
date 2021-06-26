@@ -41,27 +41,33 @@ private const val DEFAULT_TOAST_DURATION = LENGTH_LONG
 
 internal object CustomToast {
     private val DEFAULT_TEXT_COLOR = R.color.white
+
     fun Fragment.errorToast(@StringRes message: Int) = custom(requireActivity(), getString(message), R.drawable.ic_toast_error, resources.getColor(R.color.errorColor)).show()
     fun Fragment.successToast(@StringRes message: Int) = custom(requireActivity(), getString(message), R.drawable.ic_toast_success, resources.getColor(R.color.successColor)).show()
 
     @SuppressLint("ShowToast", "InflateParams")
-    fun custom(context: Context, message: String, @DrawableRes icon: Int, @ColorInt tintColor: Int): Toast = Toast.makeText(context, "", DEFAULT_TOAST_DURATION).apply {
-        val toastLayout: View = (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.toast_layout, null)
+    private fun custom(context: Context, message: String, @DrawableRes icon: Int, @ColorInt tintColor: Int): Toast =
+        Toast.makeText(context, "", DEFAULT_TOAST_DURATION).apply {
+            val toastLayout: View = (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.toast_layout, null)
 
-        toastLayout.findViewById<ImageView>(R.id.toastIcon)
-            .background = AppCompatResources.getDrawable(context, icon)!!.apply { setColorFilter(context.resources.getColor(
-            DEFAULT_TEXT_COLOR
-        ), PorterDuff.Mode.SRC_IN) }
+            toastLayout.findViewById<ImageView>(R.id.toastIcon).background = AppCompatResources.getDrawable(context, icon)!!
+                .apply {
+                    setColorFilter(
+                        context.resources.getColor(
+                            DEFAULT_TEXT_COLOR
+                        ), PorterDuff.Mode.SRC_IN
+                    )
+                }
 
-        toastLayout.findViewById<TextView>(R.id.toastText).apply {
-            text = message
-            setTextColor(context.resources.getColor(DEFAULT_TEXT_COLOR))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TEXT_SIZE)
+            toastLayout.findViewById<TextView>(R.id.toastText).apply {
+                text = message
+                setTextColor(context.resources.getColor(DEFAULT_TEXT_COLOR))
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TEXT_SIZE)
+            }
+
+            toastLayout.findViewById<CardView>(R.id.root)
+                .setCardBackgroundColor(tintColor)
+
+            view = toastLayout
         }
-
-        toastLayout.findViewById<CardView>(R.id.root)
-            .setCardBackgroundColor(tintColor)
-
-        view = toastLayout
-    }
 }

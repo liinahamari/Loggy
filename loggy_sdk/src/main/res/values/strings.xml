@@ -11,5 +11,5 @@
     <string name="io_error">Something wrong with file system!</string>
     <string name="sending_logs_successful">Logs are successfully sent!</string>
     <string name="error_sending_logs">Logs haven\'t been successfully sent!</string>
-    <string name="subject">Logs of %s</string>
+    <string name="subject">Logs of %s (application: %s)</string>
 </resources>
