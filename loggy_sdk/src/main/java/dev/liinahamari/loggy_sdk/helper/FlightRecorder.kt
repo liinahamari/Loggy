@@ -33,6 +33,9 @@ const val TAPE_VOLUME = 10485760 /*10 MB*/
 
 class FlightRecorder private constructor() {
     companion object {
+        @VisibleForTesting
+        var tapeVolume = TAPE_VOLUME
+
         private lateinit var logStorage: File
 
         fun logFileIs(file: File) {
@@ -62,16 +65,14 @@ class FlightRecorder private constructor() {
         fun printLogAndWriteToFile(
             logMessage: String,
             priority: Priority,
-            toPrintInLogcat: Boolean,
-            observeOn: Scheduler = AndroidSchedulers.mainThread(),
-            subscribeOn: Scheduler = Schedulers.io()
+            toPrintInLogcat: Boolean
         ) {
             with(logMessage.toLogMessage(priority)) {
                 clearBeginningOfLogFileIfNeeded(this)
 
                 Completable.fromCallable { logStorage.appendText(this) }
-                    .subscribeOn(subscribeOn)
-                    .observeOn(observeOn)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .timeout(5, TimeUnit.SECONDS)
                     .subscribe()
 
@@ -91,7 +92,7 @@ class FlightRecorder private constructor() {
 
         private fun clearBeginningOfLogFileIfNeeded(what: String) {
             val newDataSize = what.toByteArray().size
-            if ((logStorage.length() + newDataSize.toLong()) > TAPE_VOLUME) {
+            if ((logStorage.length() + newDataSize.toLong()) > tapeVolume) {
                 val dataToRemain = logStorage.readBytes().drop(newDataSize).toByteArray()
                 logStorage.writeBytes(dataToRemain)
             }
