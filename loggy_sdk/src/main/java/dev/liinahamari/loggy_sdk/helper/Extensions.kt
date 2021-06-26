@@ -1,6 +1,8 @@
 package dev.liinahamari.loggy_sdk.helper
 
 import android.content.Context
+import android.os.Build
+import android.os.storage.StorageManager
 import androidx.annotation.VisibleForTesting
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -15,6 +17,15 @@ import java.util.concurrent.TimeUnit
  *  */
 const val DATE_PATTERN_FOR_LOGGING = "yyyy-MM-dd HH:mm:ss:SSS"
 fun now(): String = SimpleDateFormat(DATE_PATTERN_FOR_LOGGING, Locale.getDefault()).format(Date())
+
+
+fun Context.getFreeSpaceInBytes(): Long = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    with(getSystemService(StorageManager::class.java)) {
+        getAllocatableBytes(getUuidForPath(filesDir))
+    }
+} else {
+    filesDir.usableSpace
+}
 
 fun Context.createDirIfNotExist(dirName: String) = File(filesDir, dirName).apply {
     if (exists().not()) {

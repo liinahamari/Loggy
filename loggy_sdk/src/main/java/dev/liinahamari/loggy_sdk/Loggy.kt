@@ -17,15 +17,24 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package dev.liinahamari.loggy_sdk
 
 import android.app.Application
+import android.content.Context
+import androidx.annotation.VisibleForTesting
 import dev.liinahamari.loggy_sdk.di.DaggerLoggyComponent
 import dev.liinahamari.loggy_sdk.di.LoggyComponent
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
+import dev.liinahamari.loggy_sdk.helper.TAPE_VOLUME
+import dev.liinahamari.loggy_sdk.helper.getFreeSpaceInBytes
 import java.io.File
+import java.lang.RuntimeException
 
 object Loggy {
     internal lateinit var loggyComponent: LoggyComponent
 
     fun init(application: Application, logFile: File, integratorEmail: String, userId: String) {
+        if (isStorageSpaceAvailable(application).not()) {
+            throw LoggyInitializationException("Not enough space to instantiate log storage file! Free space: ${application.getFreeSpaceInBytes()} bytes")
+        }
+
         FlightRecorder.logFileIs(logFile)
         loggyComponent = DaggerLoggyComponent.builder()
             .application(application)
@@ -34,4 +43,8 @@ object Loggy {
             .userId(userId)
             .build()
     }
+
+    private fun isStorageSpaceAvailable(context: Context): Boolean = context.getFreeSpaceInBytes() > TAPE_VOLUME
 }
+
+class LoggyInitializationException(cause: String): RuntimeException(cause)
