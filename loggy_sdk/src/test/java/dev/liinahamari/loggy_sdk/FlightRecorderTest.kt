@@ -38,6 +38,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import java.io.File
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
@@ -45,85 +46,94 @@ class FlightRecorderTest {
     @get:Rule
     val immediateSchedulersRule = ImmediateSchedulersRule()
 
-    private val logFile = createTempFile()
+    private val logsFile = File.createTempFile("logs", ".tmp")
 
     @Before
     fun setup() {
         shadowOf(getMainLooper()).idle()
-        FlightRecorder.logFileIs(logFile)
+        FlightRecorder.logFileIs(logsFile)
     }
 
     @After
     fun tearDown() {
-        logFile.writeText("")
-        assertEquals(0, logFile.length())
+        logsFile.writeText("")
+        assertEquals(0, logsFile.length())
+    }
+
+    @Test
+    fun `file's size does not change if empty string added while logging`() {
+        assertEquals(0, logsFile.length())
+
+        i { "" }
+
+        assertEquals(0L, logsFile.length())
     }
 
     @Test
     fun `FlightRecorder is writing to file while i logging`() {
-        assertEquals(0, logFile.length())
+        assertEquals(0, logsFile.length())
         val text = "some_text"
 
         i { text }
 
-        assert(logFile.length() > 0)
-        assertEquals(text.toLogMessage(FlightRecorder.Priority.I).toByteArray().size.toLong(), logFile.length())
+        assert(logsFile.length() > 0)
+        assertEquals(text.toLogMessage(FlightRecorder.Priority.I).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
     fun `FlightRecorder is writing to file while d logging`() {
-        assertEquals(0, logFile.length())
+        assertEquals(0, logsFile.length())
         val text = "some_text"
 
         d { text }
 
-        assert(logFile.length() > 0)
-        assertEquals(text.toLogMessage(FlightRecorder.Priority.D).toByteArray().size.toLong(), logFile.length())
+        assert(logsFile.length() > 0)
+        assertEquals(text.toLogMessage(FlightRecorder.Priority.D).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
     fun `FlightRecorder is writing to file while lifecycle logging`() {
-        assertEquals(0, logFile.length())
+        assertEquals(0, logsFile.length())
         val text = "some_text"
 
         lifecycle { text }
 
-        assert(logFile.length() > 0)
-        assertEquals(text.toLogMessage(FlightRecorder.Priority.LIFECYCLE).toByteArray().size.toLong(), logFile.length())
+        assert(logsFile.length() > 0)
+        assertEquals(text.toLogMessage(FlightRecorder.Priority.LIFECYCLE).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
     fun `FlightRecorder is writing to file while w logging`() {
-        assertEquals(0, logFile.length())
+        assertEquals(0, logsFile.length())
         val text = "some_text"
 
         w { text }
 
-        assert(logFile.length() > 0)
-        assertEquals(text.toLogMessage(FlightRecorder.Priority.W).toByteArray().size.toLong(), logFile.length())
+        assert(logsFile.length() > 0)
+        assertEquals(text.toLogMessage(FlightRecorder.Priority.W).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
     fun `FlightRecorder is writing to file while wtf logging`() {
-        assertEquals(0, logFile.length())
+        assertEquals(0, logsFile.length())
         val text = "some_text"
 
         wtf { text }
 
-        assert(logFile.length() > 0)
-        assertEquals(text.toLogMessage(FlightRecorder.Priority.WTF).toByteArray().size.toLong(), logFile.length())
+        assert(logsFile.length() > 0)
+        assertEquals(text.toLogMessage(FlightRecorder.Priority.WTF).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
     fun `FlightRecorder is writing to file while error logging`() {
-        assertEquals(0, logFile.length())
+        assertEquals(0, logsFile.length())
         val errorLabel = "some_text"
         val error = IllegalArgumentException()
 
         e(errorLabel, error)
 
-        assert(logFile.length() > 0)
-        assertEquals(error.toErrorLogMessage(errorLabel).toByteArray().size.toLong(), logFile.length())
+        assert(logsFile.length() > 0)
+        assertEquals(error.toErrorLogMessage(errorLabel).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
@@ -156,15 +166,15 @@ class FlightRecorderTest {
         FlightRecorder.tapeVolume = initialLoadSize
 
         i { stringToLog }
-        assertEquals(initialLoadSize.toLong(), logFile.length())
+        assertEquals(initialLoadSize.toLong(), logsFile.length())
         println("Initial text in file:".yellow())
-        println(logFile.readText())
+        println(logsFile.readText())
         println()
 
         val newLine = "______________________________________________SOME_LARGE_AMOUNT_OF_TEXT____________________________________________"
         i { newLine }
-        assertEquals(initialLoadSize.toLong(), logFile.length())
+        assertEquals(initialLoadSize.toLong(), logsFile.length())
         println("Text in file after overwriting:".yellow())
-        println(logFile.readText())
+        println(logsFile.readText())
     }
 }

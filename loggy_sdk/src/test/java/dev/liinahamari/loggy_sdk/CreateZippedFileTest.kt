@@ -55,7 +55,7 @@ Ex omnium iuvaret patrioque vis. Ea pri aliquam nonumes comprehensam, cu nam mut
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
 class CreateZippedFileTest {
-    private val logsFile = createTempFile()
+    private val logsFile = File.createTempFile("logs", ".tmp")
     private val context: Context = InstrumentationRegistry.getInstrumentation().context
     private val composers = BaseComposers()
     private val logsInteractor = LoggerInteractor(context, composers, logsFile)
@@ -103,7 +103,7 @@ class CreateZippedFileTest {
     }
 
     private fun unzip(zipFile: File): File {
-        val tempFile = createTempFile()
+        val tempFile = File.createTempFile("test", ".tmp")
         ZipInputStream(BufferedInputStream(FileInputStream(zipFile))).use { zis ->
             while (zis.nextEntry != null) {
                 val baos = ByteArrayOutputStream()

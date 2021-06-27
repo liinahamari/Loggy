@@ -24,6 +24,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.junit.Test
 import org.robolectric.annotation.Config
+import java.io.File
 
 @MockK
 @Config(sdk = [26])
@@ -32,7 +33,7 @@ class LoggyInitializationTestApi26 {
     fun `when device has is Oreo or higher and has less than expected space exception should be thrown`() {
         mockk<Application>().also { app ->
             every { app.getFreeSpaceInBytes() } returns TAPE_VOLUME - 1L
-            Loggy.init(app, createTempFile(), "doesn't_matter", "doesn't_matter")
+            Loggy.init(app, File.createTempFile("test", ".tmp"), "doesn't_matter", "doesn't_matter")
         }
     }
 
@@ -40,7 +41,7 @@ class LoggyInitializationTestApi26 {
     fun `when device has is lesser than Oreo and has more space than required, no errors should be thrown`() {
         mockk<Application>().also { app ->
             every { app.getFreeSpaceInBytes() } returns TAPE_VOLUME + 1L
-            Loggy.init(app, createTempFile(), "doesn't_matter", "doesn't_matter")
+            Loggy.init(app, File.createTempFile("test", ".tmp"), "doesn't_matter", "doesn't_matter")
         }
     }
 }
@@ -52,7 +53,7 @@ class LoggyInitializationTestApi25 {
     fun `when device has is lesser than Oreo and has less than expected space exception should be thrown`() {
         mockk<Application>().also { app ->
             every { app.getFreeSpaceInBytes() } returns TAPE_VOLUME - 1L
-            Loggy.init(app, createTempFile(), "doesn't_matter", "doesn't_matter")
+            Loggy.init(app, File.createTempFile("test", ".tmp"), "doesn't_matter", "doesn't_matter")
         }
     }
 
@@ -60,7 +61,7 @@ class LoggyInitializationTestApi25 {
     fun `when device has is lesser than Oreo and has more space than required, no errors should be thrown`() {
         mockk<Application>().also { app ->
             every { app.getFreeSpaceInBytes() } returns TAPE_VOLUME + 1L
-            Loggy.init(app, createTempFile(), "doesn't_matter", "doesn't_matter")
+            Loggy.init(app, File.createTempFile("test", ".tmp"), "doesn't_matter", "doesn't_matter")
         }
     }
 }

@@ -72,7 +72,6 @@ internal class LoggerInteractor @Inject constructor(
         }
         .toList()
         .toObservable()
-        .delaySubscription(750, TimeUnit.MILLISECONDS)
         .compose(baseComposers.applyObservableSchedulers())
         .map { if (it.isNotEmpty()) GetRecordResult.Success(it) else GetRecordResult.EmptyList }
         .onErrorReturn { GetRecordResult.IOError }

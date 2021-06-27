@@ -61,6 +61,7 @@ class FlightRecorder private constructor() {
         }
 
         private fun printLogAndWriteToFile(logMessage: String, priority: Priority, toPrintInLogcat: Boolean) {
+            if (logMessage.isBlank()) return
             with(logMessage.toLogMessage(priority)) {
                 clearBeginningOfLogFileIfNeeded(this)
 
