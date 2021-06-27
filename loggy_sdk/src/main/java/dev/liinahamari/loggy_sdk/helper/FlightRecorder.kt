@@ -21,7 +21,6 @@ import androidx.annotation.VisibleForTesting
 import dev.liinahamari.loggy_sdk.BuildConfig
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 import java.io.FileNotFoundException
@@ -38,11 +37,11 @@ class FlightRecorder private constructor() {
 
         private lateinit var logStorage: File
 
-        fun logFileIs(file: File) {
+        internal fun logFileIs(file: File) {
             logStorage = file
         }
 
-        fun getPriorityPattern(priority: Priority) = "$SEPARATOR${priority.name}$SEPARATOR"
+        internal fun getPriorityPattern(priority: Priority) = "$SEPARATOR${priority.name}$SEPARATOR"
 
         fun lifecycle(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.LIFECYCLE, toPrintInLogcat)
         fun i(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.I, toPrintInLogcat)
@@ -61,19 +60,13 @@ class FlightRecorder private constructor() {
             }
         }
 
-        @VisibleForTesting
-        fun printLogAndWriteToFile(
-            logMessage: String,
-            priority: Priority,
-            toPrintInLogcat: Boolean
-        ) {
+        private fun printLogAndWriteToFile(logMessage: String, priority: Priority, toPrintInLogcat: Boolean) {
             with(logMessage.toLogMessage(priority)) {
                 clearBeginningOfLogFileIfNeeded(this)
 
                 Completable.fromCallable { logStorage.appendText(this) }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .timeout(5, TimeUnit.SECONDS)
                     .subscribe()
 
                 if (toPrintInLogcat && BuildConfig.DEBUG) {

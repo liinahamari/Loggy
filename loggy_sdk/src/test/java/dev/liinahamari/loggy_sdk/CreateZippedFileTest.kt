@@ -23,14 +23,13 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.DEBUG_LOGS_DIR
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
-import dev.liinahamari.loggy_sdk.helper.TestSchedulers
+import dev.liinahamari.loggy_sdk.rules.ImmediateSchedulersRule
 import dev.liinahamari.loggy_sdk.screens.logs.CreateZipLogsFileResult
 import dev.liinahamari.loggy_sdk.screens.logs.LoggerInteractor
 import dev.liinahamari.loggy_sdk.screens.logs.ZIPPED_LOGS_FILE_NAME
-import io.reactivex.rxjava3.plugins.RxJavaPlugins
-import io.reactivex.rxjava3.schedulers.Schedulers
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -38,7 +37,6 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.io.*
 import java.util.zip.ZipInputStream
-
 
 @Suppress("SpellCheckingInspection")
 private const val LOREM = """
@@ -59,15 +57,16 @@ Ex omnium iuvaret patrioque vis. Ea pri aliquam nonumes comprehensam, cu nam mut
 class CreateZippedFileTest {
     private val logsFile = createTempFile()
     private val context: Context = InstrumentationRegistry.getInstrumentation().context
-    private val composers = BaseComposers(TestSchedulers())
+    private val composers = BaseComposers()
     private val logsInteractor = LoggerInteractor(context, composers, logsFile)
+
+    @get:Rule
+    val immediateSchedulersRule = ImmediateSchedulersRule()
 
     @Before
     fun `fill File with some noise`() {
         logsFile.writeText(LOREM)
         FlightRecorder.logFileIs(logsFile)
-        RxJavaPlugins.setComputationSchedulerHandler { Schedulers.trampoline() }
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
     }
 
     @After

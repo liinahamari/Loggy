@@ -21,8 +21,6 @@ import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
-import dev.liinahamari.loggy_sdk.helper.BaseSchedulerProvider
-import dev.liinahamari.loggy_sdk.helper.SchedulersProvider
 import dev.liinahamari.loggy_sdk.screens.logs.LoggerInteractor
 import java.io.File
 import javax.inject.Named
@@ -43,9 +41,5 @@ internal class LoggyModule {
 
     @Provides
     @Singleton
-    fun provideComposers(schedulerProvider: SchedulersProvider): BaseComposers = BaseComposers(schedulerProvider)
-
-    @Provides
-    @Singleton
-    fun provideSchedulerProvider(): SchedulersProvider = BaseSchedulerProvider()
+    fun provideComposers(): BaseComposers = BaseComposers()
 }

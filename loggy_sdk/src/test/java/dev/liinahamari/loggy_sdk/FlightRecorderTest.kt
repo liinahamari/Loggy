@@ -28,14 +28,11 @@ import dev.liinahamari.loggy_sdk.helper.FlightRecorder.Companion.wtf
 import dev.liinahamari.loggy_sdk.helper.toErrorLogMessage
 import dev.liinahamari.loggy_sdk.helper.toLogMessage
 import dev.liinahamari.loggy_sdk.helper.yellow
-import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
-import io.reactivex.rxjava3.core.Scheduler
-import io.reactivex.rxjava3.functions.Function
-import io.reactivex.rxjava3.plugins.RxJavaPlugins
-import io.reactivex.rxjava3.schedulers.Schedulers
+import dev.liinahamari.loggy_sdk.rules.ImmediateSchedulersRule
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -45,15 +42,15 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
 class FlightRecorderTest {
+    @get:Rule
+    val immediateSchedulersRule = ImmediateSchedulersRule()
+
     private val logFile = createTempFile()
 
     @Before
     fun setup() {
         shadowOf(getMainLooper()).idle()
         FlightRecorder.logFileIs(logFile)
-        RxJavaPlugins.setComputationSchedulerHandler { Schedulers.trampoline() }
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler{ Schedulers.trampoline() }
     }
 
     @After

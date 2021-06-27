@@ -16,21 +16,23 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package dev.liinahamari.loggy_sdk.helper
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.CompletableTransformer
 import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.schedulers.Schedulers
 
-internal class BaseComposers constructor(private val schedulers: SchedulersProvider) {
+internal class BaseComposers {
     fun <T> applyObservableSchedulers(errorLabel: String = "meta"): ObservableTransformer<T, T> =
         ObservableTransformer {
-            it.subscribeOn(schedulers.io())
-                .observeOn(schedulers.ui())
+            it.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnError { err -> FlightRecorder.e(errorLabel, err) }
         }
 
     fun applyCompletableSchedulers(errorLabel: String = "meta"): CompletableTransformer =
         CompletableTransformer {
-            it.subscribeOn(schedulers.io())
-                .observeOn(schedulers.ui())
+            it.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnError { err -> FlightRecorder.e(errorLabel, err) }
         }
 }
