@@ -21,7 +21,7 @@ import io.reactivex.rxjava3.core.CompletableTransformer
 import io.reactivex.rxjava3.core.ObservableTransformer
 import io.reactivex.rxjava3.schedulers.Schedulers
 
-internal class BaseComposers {
+class BaseComposers {
     fun <T> applyObservableSchedulers(errorLabel: String = "meta"): ObservableTransformer<T, T> =
         ObservableTransformer {
             it.subscribeOn(Schedulers.io())

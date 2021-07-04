@@ -29,13 +29,16 @@ const val EMAIL_QUALIFIER = "q--email"
 
 @Singleton
 @Component(modules = [LoggyModule::class, ViewModelBuilderModule::class])
-internal interface LoggyComponent {
+interface LoggyComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance fun application(app: Application): Builder
         @BindsInstance fun logFile(logFile: File): Builder
         @BindsInstance fun email(@Named(EMAIL_QUALIFIER) email: String): Builder
-        @BindsInstance fun userId(@Named(USER_ID_QUALIFIER) email: String): Builder
+        @BindsInstance fun userId(@Named(USER_ID_QUALIFIER) userId: String): Builder
+
+        /** for testing purposes */
+        fun loggyModule(module: LoggyModule): Builder
 
         fun build(): LoggyComponent
     }

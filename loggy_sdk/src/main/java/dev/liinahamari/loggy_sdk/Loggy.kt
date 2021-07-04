@@ -28,7 +28,7 @@ import java.io.File
 import java.lang.RuntimeException
 
 object Loggy {
-    internal lateinit var loggyComponent: LoggyComponent
+     lateinit var loggyComponent: LoggyComponent
 
     fun init(application: Application, logFile: File, integratorEmail: String, userId: String) {
         if (isStorageSpaceAvailable(application).not()) {

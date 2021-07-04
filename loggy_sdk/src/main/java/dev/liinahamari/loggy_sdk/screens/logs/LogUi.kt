@@ -18,7 +18,7 @@ package dev.liinahamari.loggy_sdk.screens.logs
 
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 
-internal sealed class LogUi {
+ sealed class LogUi {
     abstract val time: Long
     abstract val thread: String
 

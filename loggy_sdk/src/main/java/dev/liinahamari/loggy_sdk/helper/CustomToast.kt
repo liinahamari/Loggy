@@ -39,7 +39,7 @@ import dev.liinahamari.loggy_sdk.R
 private const val DEFAULT_TEXT_SIZE = 16f /*sp*/
 private const val DEFAULT_TOAST_DURATION = LENGTH_LONG
 
-internal object CustomToast {
+ object CustomToast {
     private val DEFAULT_TEXT_COLOR = R.color.white
 
     fun Fragment.errorToast(@StringRes message: Int) = custom(requireActivity(), getString(message), R.drawable.ic_toast_error, resources.getColor(R.color.errorColor)).show()

@@ -26,7 +26,7 @@ import dev.liinahamari.loggy_sdk.screens.logs.LogsViewModel
 import kotlin.reflect.KClass
 
 @Module
-internal abstract class ViewModelBuilderModule {
+ abstract class ViewModelBuilderModule {
     @Binds
     @IntoMap
     @ViewModelKey(LogsViewModel::class)
@@ -43,4 +43,4 @@ internal abstract class ViewModelBuilderModule {
 )
 @Retention(AnnotationRetention.RUNTIME)
 @MapKey
-internal annotation class ViewModelKey(val value: KClass<out ViewModel>)
+ annotation class ViewModelKey(val value: KClass<out ViewModel>)

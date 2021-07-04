@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.item_error_log.*
 private const val LOG_TYPE_INFO = 1
 private const val LOG_TYPE_ERROR = 2
 
-internal class LogsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+ class LogsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val clicks = CompositeDisposable()
     private lateinit var expandedMarkers: SparseBooleanArray
     private var errorItemHeight = -1

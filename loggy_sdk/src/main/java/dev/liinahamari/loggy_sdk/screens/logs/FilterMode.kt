@@ -16,6 +16,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package dev.liinahamari.loggy_sdk.screens.logs
 
-internal enum class FilterMode {
+ enum class FilterMode {
     ALL, SHOW_ERRORS, SHOW_NON_MAIN_THREAD, HIDE_LIFECYCLE
 }

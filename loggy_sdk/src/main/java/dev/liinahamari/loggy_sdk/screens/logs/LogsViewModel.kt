@@ -17,6 +17,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package dev.liinahamari.loggy_sdk.screens.logs
 
 import android.net.Uri
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseViewModel
@@ -24,7 +25,7 @@ import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
 
-internal class LogsViewModel @Inject constructor(private val loggerInteractor: LoggerInteractor) : BaseViewModel() {
+ class LogsViewModel @Inject constructor(private val loggerInteractor: LoggerInteractor) : BaseViewModel() {
     private val _loadingEvent = SingleLiveEvent<Boolean>()
     val loadingEvent: LiveData<Boolean> get() = _loadingEvent
 

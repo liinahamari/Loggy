@@ -43,7 +43,7 @@ const val ZIPPED_LOGS_FILE_NAME = "logs.zip"
 /** Be sure what it is matching pattern in use of FlightRecorder class*/
 val LOG_PATTERN_REGEX = "$SEPARATOR(\\w)$SEPARATOR\\s+(\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}:\\d{3})\\s$SEPARATOR([^$SEPARATOR]*)$SEPARATOR:\\s+((.|\n|\t)*)".toRegex()
 
-internal class LoggerInteractor @Inject constructor(
+class LoggerInteractor @Inject constructor(
     private val applicationContext: Context,
     private val baseComposers: BaseComposers,
     private val logFile: File
@@ -133,20 +133,20 @@ internal class LoggerInteractor @Inject constructor(
         .compose(baseComposers.applyCompletableSchedulers("Deleting $ZIPPED_LOGS_FILE_NAME"))
 }
 
-internal sealed class CreateZipLogsFileResult {
+ sealed class CreateZipLogsFileResult {
     data class Success(val path: Uri) : CreateZipLogsFileResult()
     object IOError : CreateZipLogsFileResult()
     object InProgress : CreateZipLogsFileResult()
 }
 
-internal sealed class GetRecordResult {
+ sealed class GetRecordResult {
     object EmptyList : GetRecordResult()
     object InProgress : GetRecordResult()
     data class Success(val logs: List<LogUi>) : GetRecordResult()
     object IOError : GetRecordResult()
 }
 
-internal sealed class ClearRecordResult {
+ sealed class ClearRecordResult {
     object InProgress : ClearRecordResult()
     object Success : ClearRecordResult()
     object IOError : ClearRecordResult()

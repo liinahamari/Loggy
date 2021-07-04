@@ -29,10 +29,10 @@ import javax.inject.Singleton
 const val APPLICATION_CONTEXT = "app_context"
 
 @Module
-internal class LoggyModule {
+open class LoggyModule {
     @Provides
     @Singleton
-    fun provideLoggerInteractor(@Named(APPLICATION_CONTEXT) appContext: Context, composers: BaseComposers, logFile: File): LoggerInteractor = LoggerInteractor(appContext, composers, logFile)
+    open fun provideLoggerInteractor(@Named(APPLICATION_CONTEXT) appContext: Context, composers: BaseComposers, logFile: File): LoggerInteractor = LoggerInteractor(appContext, composers, logFile)
 
     @Provides
     @Singleton

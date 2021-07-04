@@ -21,7 +21,7 @@ import androidx.lifecycle.ViewModel
 import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
-internal open class BaseViewModel: ViewModel() {
+open class BaseViewModel: ViewModel() {
     protected val disposable = CompositeDisposable()
     override fun onCleared() = disposable.clear()
 

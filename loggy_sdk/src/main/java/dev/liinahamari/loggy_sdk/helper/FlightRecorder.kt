@@ -37,11 +37,11 @@ class FlightRecorder private constructor() {
 
         private lateinit var logStorage: File
 
-        internal fun logFileIs(file: File) {
+         fun logFileIs(file: File) {
             logStorage = file
         }
 
-        internal fun getPriorityPattern(priority: Priority) = "$SEPARATOR${priority.name}$SEPARATOR"
+         fun getPriorityPattern(priority: Priority) = "$SEPARATOR${priority.name}$SEPARATOR"
 
         fun lifecycle(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.LIFECYCLE, toPrintInLogcat)
         fun i(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.I, toPrintInLogcat)
