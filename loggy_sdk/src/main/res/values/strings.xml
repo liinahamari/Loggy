@@ -1,4 +1,9 @@
 <resources>
+    <string name="send_logs_to_developer_fab" translatable="false">sendLogsToDeveloperFab</string>
+    <string name="filter_logs_fab" translatable="false">filter_logs_fab</string>
+    <string name="clear_logs_fab" translatable="false">clear_logs_fab</string>
+    <string name="main_fab" translatable="false">main_fab</string>
+
     <string name="app_name">Loggy</string>
     <string name="title_logs">Logs</string>
     <string name="title_send_logs">Send logs to developer</string>
@@ -12,4 +17,5 @@
     <string name="sending_logs_successful">Logs are successfully sent!</string>
     <string name="error_sending_logs">Logs haven\'t been successfully sent!</string>
     <string name="subject">Logs of %s (application: %s)</string>
+    <string name="title_filter">Filter</string>
 </resources>

@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/map_fragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/logsToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/purple_500"
-        android:elevation="4dp"
-        android:paddingEnd="10dp"
-        android:theme="@style/DarkActionBarTheme"
-        app:menu="@menu/logs_menu"
-        app:navigationIcon="@drawable/ic_close_24"
-        app:title="@string/title_logs"
-        app:titleTextColor="@color/white"
-        tools:ignore="RtlSymmetry" />
+    android:layout_height="match_parent">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -37,5 +24,172 @@
             android:id="@+id/logsRv"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_dodgeInsetEdges="bottom">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/sendLogsToDeveloperFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:contentDescription="@string/send_logs_to_developer_fab"
+                android:focusable="true"
+                app:backgroundTint="@color/purple_500"
+                app:fabSize="mini"
+                app:tint="@color/white"
+                app:layout_constraintBottom_toTopOf="@+id/clearLogsFab"
+                app:layout_constraintEnd_toEndOf="@+id/clearLogsFab"
+                app:layout_constraintStart_toStartOf="@+id/clearLogsFab"
+                app:srcCompat="@drawable/ic_baseline_send_24" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sendLogsToDeveloperFabLabel"
+                style="@style/Widget.MaterialComponents.CardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/purple_500"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="4dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintBottom_toBottomOf="@+id/sendLogsToDeveloperFab"
+                app:layout_constraintEnd_toStartOf="@+id/sendLogsToDeveloperFab"
+                app:layout_constraintTop_toTopOf="@+id/sendLogsToDeveloperFab">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:paddingLeft="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/title_send_logs"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/clearLogsFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:contentDescription="@string/clear_logs_fab"
+                android:focusable="true"
+                app:backgroundTint="@color/purple_500"
+                app:fabSize="mini"
+                app:tint="@color/white"
+                app:layout_constraintBottom_toTopOf="@+id/filterLogsFab"
+                app:layout_constraintEnd_toEndOf="@+id/filterLogsFab"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/filterLogsFab"
+                app:srcCompat="@drawable/ic_close_24" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/clearLogsFabLabel"
+                style="@style/Widget.MaterialComponents.CardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/purple_500"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="4dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintBottom_toBottomOf="@+id/clearLogsFab"
+                app:layout_constraintEnd_toStartOf="@+id/clearLogsFab"
+                app:layout_constraintTop_toTopOf="@+id/clearLogsFab">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/title_erase_logs"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/filterLogsFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:contentDescription="@string/filter_logs_fab"
+                android:focusable="true"
+                app:backgroundTint="@color/purple_500"
+                app:fabSize="mini"
+                app:tint="@color/white"
+                app:layout_constraintBottom_toTopOf="@+id/mainFab"
+                app:layout_constraintEnd_toEndOf="@+id/mainFab"
+                app:layout_constraintStart_toStartOf="@+id/mainFab"
+                app:srcCompat="@drawable/ic_baseline_filter_24" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/filterFabLabel"
+                style="@style/Widget.MaterialComponents.CardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/purple_500"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="4dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintBottom_toBottomOf="@+id/filterLogsFab"
+                app:layout_constraintEnd_toStartOf="@+id/filterLogsFab"
+                app:layout_constraintTop_toTopOf="@+id/filterLogsFab">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/title_filter"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/mainFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:contentDescription="@string/main_fab"
+                android:focusable="true"
+                app:backgroundTint="@color/purple_700"
+                app:fabSize="normal"
+                app:tint="@null"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:srcCompat="@drawable/ic_menu" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/fabMenu"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                app:constraint_referenced_ids="sendLogsToDeveloperFab,sendLogsToDeveloperFabLabel,clearLogsFab,clearLogsFabLabel,filterLogsFab,filterFabLabel" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

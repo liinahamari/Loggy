@@ -26,11 +26,14 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jakewharton.rxbinding4.appcompat.navigationClicks
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.isItemChecked
+import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.jakewharton.rxbinding4.view.clicks
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseFragment
 import dev.liinahamari.loggy_sdk.helper.CustomToast.errorToast
+import dev.liinahamari.loggy_sdk.helper.CustomToast.infoToast
 import dev.liinahamari.loggy_sdk.helper.CustomToast.successToast
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -40,6 +43,9 @@ private const val FILE_SENDING_REQUEST_CODE = 1011010
 private const val TEXT_TYPE = "text/plain"
 
 class LogsFragment : BaseFragment(R.layout.fragment_logs) {
+    private val logsFilters = mutableListOf<Int>()
+    private var isFabMenuOpened = false
+
     companion object {
         fun newInstance() = LogsFragment()
     }
@@ -116,59 +122,97 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
             if (resultCode == RESULT_OK) {
                 successToast(R.string.sending_logs_successful)
             } else {
-                errorToast(R.string.error_sending_logs)
+                infoToast(R.string.error_sending_logs)
             }
             viewModel.deleteZippedLogs()
         }
     }
 
     override fun setupClicks() {
-        subscriptions += io.reactivex.rxjava3.core.Observable.combineLatest(
-            logsToolbar.menu.findItem(R.id.hideLifecycleEvents)
-                .clicks()
-                .doOnNext { logsToolbar.menu.findItem(R.id.hideLifecycleEvents).isChecked = logsToolbar.menu.findItem(R.id.hideLifecycleEvents).isChecked.not() }
-                .map { logsToolbar.menu.findItem(R.id.hideLifecycleEvents).isChecked }
-                .startWithItem(false),
-            logsToolbar.menu.findItem(R.id.onlyErrors)
-                .clicks()
-                .doOnNext { logsToolbar.menu.findItem(R.id.onlyErrors).isChecked = logsToolbar.menu.findItem(R.id.onlyErrors).isChecked.not() }
-                .map { logsToolbar.menu.findItem(R.id.onlyErrors).isChecked }
-                .startWithItem(false),
-            logsToolbar.menu.findItem(R.id.nonMainThreadOnly)
-                .clicks()
-                .doOnNext { logsToolbar.menu.findItem(R.id.nonMainThreadOnly).isChecked = logsToolbar.menu.findItem(R.id.nonMainThreadOnly).isChecked.not() }
-                .map { logsToolbar.menu.findItem(R.id.nonMainThreadOnly).isChecked }
-                .startWithItem(false),
-            { hideLifecycleEvents: Boolean, onlyErrors: Boolean, nonMainThread: Boolean -> mutableListOf<FilterMode>().apply {
-                if (onlyErrors) {
-                    add(FilterMode.SHOW_ERRORS)
-                }
-                if (hideLifecycleEvents) {
-                    add(FilterMode.HIDE_LIFECYCLE)
-                }
-                if (nonMainThread) {
-                    add(FilterMode.SHOW_NON_MAIN_THREAD)
-                }
-            } }
-        )
-            .skip(1)
+        subscriptions += clearLogsFab
+            .clicks()
+            .throttleFirst()
             .subscribe {
-                viewModel.sortLogs(it)
+                fabMenu.isVisible = false
+                viewModel.clearLogs()
             }
 
-        subscriptions += logsToolbar.menu.findItem(R.id.sendLogs)
+        subscriptions += filterLogsFab
             .clicks()
             .throttleFirst()
-            .subscribe { viewModel.createZippedLogsFile() }
+            .subscribe {
+                fabMenu.isVisible = false
 
-        subscriptions += logsToolbar.menu.findItem(R.id.clearLogs)
+                MaterialDialog(requireContext()).show {
+                    listItemsMultiChoice(
+                        res = R.array.filter_mode,
+                        initialSelection = logsFilters.toIntArray()
+                    )
+
+                    positiveButton(android.R.string.ok) {
+                        mutableListOf<FilterMode>().apply {
+                            0.also {
+                                if (isItemChecked(it)) {
+                                    add(FilterMode.SHOW_ERRORS)
+                                    logsFilters.add(it)
+                                } else {
+                                    logsFilters.remove(it)
+                                }
+                            }
+
+                            1.also {
+                                if (isItemChecked(it)) {
+                                    add(FilterMode.HIDE_LIFECYCLE)
+                                    logsFilters.add(it)
+                                } else {
+                                    logsFilters.remove(it)
+                                }
+                            }
+
+                            2.also {
+                                if (isItemChecked(it)) {
+                                    add(FilterMode.SHOW_NON_MAIN_THREAD)
+                                    logsFilters.add(it)
+                                } else {
+                                    logsFilters.add(it)
+                                }
+                            }
+                        }.also {
+                            viewModel.sortLogs(it)
+                        }
+                    }
+                    negativeButton(android.R.string.cancel) {}
+                }
+            }
+
+        subscriptions += sendLogsToDeveloperFab
             .clicks()
             .throttleFirst()
-            .subscribe { viewModel.clearLogs() }
+            .subscribe {
+                fabMenu.isVisible = false
+                viewModel.createZippedLogsFile()
+            }
 
-        subscriptions += logsToolbar
-            .navigationClicks()
+        subscriptions += mainFab
+            .clicks()
             .throttleFirst()
-            .subscribe { /*if(isInForeground) ?*/requireActivity().supportFragmentManager.popBackStackImmediate() }
+            .subscribe {
+                fabMenu.isVisible = false
+                if (isFabMenuOpened.not()) {
+                    showFabMenu()
+                } else {
+                    closeFabMenu()
+                }
+            }
+    }
+
+    private fun showFabMenu() {
+        isFabMenuOpened = true
+        fabMenu.isVisible = true
+    }
+
+    private fun closeFabMenu() {
+        isFabMenuOpened = false
+        fabMenu.isVisible = false
     }
 }
