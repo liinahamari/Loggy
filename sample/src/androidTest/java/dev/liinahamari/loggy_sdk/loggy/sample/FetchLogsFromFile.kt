@@ -16,45 +16,19 @@
 
 package dev.liinahamari.loggy_sdk.loggy.sample
 
-import android.content.Context
-import android.view.View
-import androidx.fragment.app.commitNow
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import dagger.Module
-import dagger.Provides
-import dev.liinahamari.loggy_sdk.Loggy
-import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
-import dev.liinahamari.loggy_sdk.di.DaggerLoggyComponent
-import dev.liinahamari.loggy_sdk.di.LoggyModule
-import dev.liinahamari.loggy_sdk.helper.BaseComposers
-import dev.liinahamari.loggy_sdk.helper.FlightRecorder
-import dev.liinahamari.loggy_sdk.loggy.R
+import dev.liinahamari.loggy_sdk.loggy.sample.Setup.dummyErrorLog
+import dev.liinahamari.loggy_sdk.loggy.sample.Setup.dummyInfoLog
+import dev.liinahamari.loggy_sdk.loggy.sample.Setup.setupLoggerInteractorInjection
 import dev.liinahamari.loggy_sdk.loggy.sample.screens.main.MainActivity
 import dev.liinahamari.loggy_sdk.screens.logs.GetRecordResult
 import dev.liinahamari.loggy_sdk.screens.logs.LogUi
-import dev.liinahamari.loggy_sdk.screens.logs.LoggerInteractor
-import dev.liinahamari.loggy_sdk.screens.logs.LogsFragment
-import io.github.kakaocup.kakao.image.KImageView
-import io.github.kakaocup.kakao.recycler.KRecyclerItem
-import io.github.kakaocup.kakao.recycler.KRecyclerView
-import io.github.kakaocup.kakao.screen.Screen
 import io.github.kakaocup.kakao.screen.Screen.Companion.onScreen
-import io.github.kakaocup.kakao.text.KTextView
-import io.mockk.every
-import io.mockk.mockk
-import io.reactivex.rxjava3.core.Observable
-import org.hamcrest.Matcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
-import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.random.Random
-
-private const val DUMMY = "dummy"
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class FetchLogsFromFile {
@@ -64,7 +38,7 @@ class FetchLogsFromFile {
 
     @Test
     fun whenNoLogsInFileThenLogsRecyclerIsGoneAndPlaceholderIsVisible() {
-        setupLoggerInteractorInjection(GetRecordResult.EmptyList)
+        setupLoggerInteractorInjection(GetRecordResult.EmptyList, rule)
         onScreen<LogsRecyclerScreen> {
             logsRecycler {
                 isGone()
@@ -77,8 +51,10 @@ class FetchLogsFromFile {
 
     @Test
     fun whenOneErrorLogInFileThenLogsRecyclerIsVisibleAndHasOneItemWithTypeOfErrorLog() {
-        val dummyStackTrace = "dummy_stacktrace"
-        setupLoggerInteractorInjection(GetRecordResult.Success(listOf(LogUi.ErrorLog(DUMMY, dummyStackTrace, 1L, DUMMY))))
+        setupLoggerInteractorInjection(
+            GetRecordResult.Success(listOf(dummyErrorLog)),
+            rule
+        )
         onScreen<LogsRecyclerScreen> {
             emptyLogsPlaceholder {
                 isGone()
@@ -90,11 +66,11 @@ class FetchLogsFromFile {
                     isVisible()
                     errorLogDescription {
                         isVisible()
-                        hasText(DUMMY)
+                        hasText(DUMMY_DESCRIPTION)
                     }
                     stackTrace {
                         isVisible()
-                        hasText(dummyStackTrace)
+                        hasText(DUMMY_STACKTRACE)
                     }
                     expandButton { isVisible() }
                 }
@@ -104,20 +80,20 @@ class FetchLogsFromFile {
 
     @Test
     fun whenOneInfoLogInFileThenLogsRecyclerIsVisibleAndHasOneItemWithTypeOfInfoLog() {
-        val logPriority = FlightRecorder.Priority.D
-        setupLoggerInteractorInjection(GetRecordResult.Success(listOf(LogUi.InfoLog(DUMMY, 1L, DUMMY, logPriority))))
+        val logs = listOf(dummyInfoLog)
+        setupLoggerInteractorInjection(GetRecordResult.Success(logs), rule)
         onScreen<LogsRecyclerScreen> {
             emptyLogsPlaceholder {
                 isGone()
             }
             logsRecycler {
                 isVisible()
-                hasSize(1)
+                hasSize(logs.size)
                 firstChild<LogsRecyclerScreen.InfoLogItem> {
                     isVisible()
                     logDescription {
                         isVisible()
-                        containsText(DUMMY)
+                        containsText(DUMMY_DESCRIPTION)
                     }
                 }
             }
@@ -129,9 +105,9 @@ class FetchLogsFromFile {
         val errorLogs = mutableListOf<LogUi.ErrorLog>()
         val randomAmount = Random.nextInt(50)
         for (i in 0 until randomAmount) {
-            errorLogs.add(LogUi.ErrorLog(DUMMY, DUMMY, 1L, DUMMY))
+            errorLogs.add(dummyErrorLog)
         }
-        setupLoggerInteractorInjection(GetRecordResult.Success(errorLogs))
+        setupLoggerInteractorInjection(GetRecordResult.Success(errorLogs), rule)
 
         onScreen<LogsRecyclerScreen> {
             emptyLogsPlaceholder {
@@ -146,7 +122,7 @@ class FetchLogsFromFile {
                         isVisible()
                         errorLogDescription {
                             isVisible()
-                            hasText(DUMMY)
+                            hasText(DUMMY_DESCRIPTION)
                         }
                     }
                 }
@@ -156,20 +132,8 @@ class FetchLogsFromFile {
 
     @Test
     fun checkParticularValuesAppliedOnErrorLogDisplaying() {
-        val stackTrace = "dummy_stacktrace"
-        val label = "dummy_label"
-        val threadLabel = "dummy_thread_label"
-
-        val errorLogs = listOf(
-            LogUi.ErrorLog(
-                label = label,
-                stacktrace = stackTrace,
-                time = 1L,
-                thread = threadLabel
-            )
-        )
-
-        setupLoggerInteractorInjection(GetRecordResult.Success(errorLogs))
+        val logs = listOf(dummyErrorLog)
+        setupLoggerInteractorInjection(GetRecordResult.Success(logs), rule)
 
         onScreen<LogsRecyclerScreen> {
             emptyLogsPlaceholder {
@@ -177,16 +141,16 @@ class FetchLogsFromFile {
             }
             logsRecycler {
                 isVisible()
-                hasSize(errorLogs.size)
+                hasSize(logs.size)
                 childAt<LogsRecyclerScreen.ErrorLogItem>(0) {
                     isVisible()
                     errorLogDescription {
                         isVisible()
-                        hasText(label)
+                        hasText(DUMMY_DESCRIPTION)
                     }
                     stackTrace {
                         isVisible()
-                        hasText(stackTrace)
+                        hasText(DUMMY_STACKTRACE)
                     }
                     expandButton {
                         isVisible()
@@ -198,19 +162,8 @@ class FetchLogsFromFile {
 
     @Test
     fun checkParticularValuesAppliedOnInfoLogDisplaying() {
-        val logBody = "dummy_log"
-        val threadLabel = "dummy_thread_label"
-
-        val infoLogs = listOf(
-            LogUi.InfoLog(
-                message = logBody,
-                time = 1L,
-                thread = threadLabel,
-                priority = FlightRecorder.Priority.D
-            )
-        )
-
-        setupLoggerInteractorInjection(GetRecordResult.Success(infoLogs))
+        val logs = listOf(dummyInfoLog)
+        setupLoggerInteractorInjection(GetRecordResult.Success(logs), rule)
 
         onScreen<LogsRecyclerScreen> {
             emptyLogsPlaceholder {
@@ -218,63 +171,15 @@ class FetchLogsFromFile {
             }
             logsRecycler {
                 isVisible()
-                hasSize(infoLogs.size)
+                hasSize(logs.size)
                 childAt<LogsRecyclerScreen.InfoLogItem>(0) {
                     isVisible()
                     logDescription {
                         isVisible()
-                        hasText(logBody)
+                        hasText(DUMMY_DESCRIPTION)
                     }
                 }
             }
         }
-    }
-
-    private fun setupLoggerInteractorInjection(result: GetRecordResult) {
-        mockk<Loggy> {
-            every { loggyComponent } returns DaggerLoggyComponent.builder()
-                .application(getApplicationContext<Application>())
-                .email(DUMMY)
-                .userId(DUMMY)
-                .logFile(File.createTempFile(DUMMY, ".tmp"))
-                .loggyModule(MockLoggyModule(getApplicationContext<Application>(), result))
-                .build()
-        }
-        rule.scenario.onActivity {
-            it.supportFragmentManager.commitNow {
-                replace(R.id.container, LogsFragment.newInstance())
-            }
-        }
-    }
-}
-
-@Module
-class MockLoggyModule(private val context: Context, private val result: GetRecordResult) : LoggyModule() {
-    @Provides
-    @Singleton
-    override fun provideLoggerInteractor(@Named(APPLICATION_CONTEXT) appContext: Context, composers: BaseComposers, logFile: File): LoggerInteractor =
-        mockk {
-            every { getEntireRecord() } returns Observable.just(result)
-        }
-}
-
-open class LogsRecyclerScreen : Screen<LogsRecyclerScreen>() {
-    val logsRecycler: KRecyclerView = KRecyclerView({
-        withId(R.id.logsRv)
-    }, itemTypeBuilder = {
-        itemType(LogsRecyclerScreen::InfoLogItem)
-        itemType(LogsRecyclerScreen::ErrorLogItem)
-    })
-
-    val emptyLogsPlaceholder: KTextView = KTextView { withId(R.id.emptyLogsTv) }
-
-    class InfoLogItem(parent: Matcher<View>) : KRecyclerItem<InfoLogItem>(parent) {
-        val logDescription: KTextView = KTextView(parent) { withId(R.id.logInfoTv) }
-    }
-
-    class ErrorLogItem(parent: Matcher<View>) : KRecyclerItem<ErrorLogItem>(parent) {
-        val errorLogDescription: KTextView = KTextView(parent) { withId(R.id.logErrorTv) }
-        val expandButton: KImageView = KImageView(parent) { withId(R.id.arrowBtn) }
-        val stackTrace: KTextView = KTextView(parent) { withId(R.id.stacktraceTv) }
     }
 }
