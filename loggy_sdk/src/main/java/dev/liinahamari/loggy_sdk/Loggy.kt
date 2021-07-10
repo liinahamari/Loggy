@@ -18,7 +18,6 @@ package dev.liinahamari.loggy_sdk
 
 import android.app.Application
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import dev.liinahamari.loggy_sdk.di.DaggerLoggyComponent
 import dev.liinahamari.loggy_sdk.di.LoggyComponent
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder

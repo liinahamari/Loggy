@@ -106,15 +106,15 @@ class CreateZippedFileTest {
         val tempFile = File.createTempFile("test", ".tmp")
         ZipInputStream(BufferedInputStream(FileInputStream(zipFile))).use { zis ->
             while (zis.nextEntry != null) {
-                val baos = ByteArrayOutputStream()
+                val outputStream = ByteArrayOutputStream()
                 val buffer = ByteArray(1024)
                 var count: Int
-                FileOutputStream(tempFile).use { fout ->
+                FileOutputStream(tempFile).use { fileOutputStream ->
                     while (zis.read(buffer).also { count = it } != -1) {
-                        baos.write(buffer, 0, count)
-                        val bytes: ByteArray = baos.toByteArray()
-                        fout.write(bytes)
-                        baos.reset()
+                        outputStream.write(buffer, 0, count)
+                        val bytes: ByteArray = outputStream.toByteArray()
+                        fileOutputStream.write(bytes)
+                        outputStream.reset()
                     }
                 }
                 zis.closeEntry()

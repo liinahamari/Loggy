@@ -24,7 +24,6 @@ import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 import java.io.FileNotFoundException
-import java.util.concurrent.TimeUnit
 
 const val SEPARATOR = "/"
 const val DEBUG_LOGS_DIR = "TempLogs"

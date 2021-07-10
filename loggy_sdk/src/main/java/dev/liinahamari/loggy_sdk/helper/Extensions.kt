@@ -3,7 +3,6 @@ package dev.liinahamari.loggy_sdk.helper
 import android.content.Context
 import android.os.Build
 import android.os.storage.StorageManager
-import androidx.annotation.VisibleForTesting
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import java.io.File

@@ -17,7 +17,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package dev.liinahamari.loggy_sdk.screens.logs
 
 import android.net.Uri
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseViewModel

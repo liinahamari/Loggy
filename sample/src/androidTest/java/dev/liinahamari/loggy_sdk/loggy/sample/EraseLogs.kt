@@ -23,7 +23,6 @@ import dev.liinahamari.loggy_sdk.loggy.sample.Setup.dummyInfoLog
 import dev.liinahamari.loggy_sdk.loggy.sample.Setup.setupLoggerInteractorInjection
 import dev.liinahamari.loggy_sdk.loggy.sample.screens.main.MainActivity
 import dev.liinahamari.loggy_sdk.screens.logs.GetRecordResult
-import dev.liinahamari.loggy_sdk.screens.logs.LogUi
 import io.github.kakaocup.kakao.screen.Screen.Companion.onScreen
 import org.junit.Rule
 import org.junit.Test
