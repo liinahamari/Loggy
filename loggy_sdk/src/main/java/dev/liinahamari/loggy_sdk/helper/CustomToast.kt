@@ -42,7 +42,7 @@ private const val DEFAULT_TOAST_DURATION = LENGTH_LONG
  object CustomToast {
     private val DEFAULT_TEXT_COLOR = R.color.white
 
-    fun Fragment.infoToast(@StringRes message: Int) = custom(requireActivity(), getString(message), R.drawable.ic_toast_info, resources.getColor(R.color.teal_200)).show()
+    fun Fragment.infoToast(@StringRes message: Int) = custom(requireActivity(), getString(message), R.drawable.ic_toast_info, resources.getColor(R.color.purple_200)).show()
     fun Fragment.errorToast(@StringRes message: Int) = custom(requireActivity(), getString(message), R.drawable.ic_toast_error, resources.getColor(R.color.errorColor)).show()
     fun Fragment.successToast(@StringRes message: Int) = custom(requireActivity(), getString(message), R.drawable.ic_toast_success, resources.getColor(R.color.successColor)).show()
 
