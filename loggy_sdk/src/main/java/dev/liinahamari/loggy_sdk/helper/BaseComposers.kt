@@ -19,9 +19,17 @@ package dev.liinahamari.loggy_sdk.helper
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.CompletableTransformer
 import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.core.SingleTransformer
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 class BaseComposers {
+    fun <T> applySingleSchedulers(errorLabel: String = "meta"): SingleTransformer<T, T> =
+        SingleTransformer {
+            it.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError { err -> FlightRecorder.e(errorLabel, err) }
+        }
+
     fun <T> applyObservableSchedulers(errorLabel: String = "meta"): ObservableTransformer<T, T> =
         ObservableTransformer {
             it.subscribeOn(Schedulers.io())
