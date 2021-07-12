@@ -39,7 +39,7 @@ import java.io.*
 import java.util.zip.ZipInputStream
 
 @Suppress("SpellCheckingInspection")
-private const val LOREM = """
+const val LOREM = """
     Lorem ipsum dolor sit amet, persius efficiendi sea an, vim te nusquam luptatum dissentias. Fabulas omittam sed an, eirmod facilisis iudicabit ne vis. Ad quo praesent vituperata adversarium, ea mei quot ullamcorper. Usu quis facilisi et.
 Omnium mentitum quaestio et eos, feugait nominavi qui an, tamquam praesent id has. At ius eruditi efficiendi, an assum viris instructior pro. Facer inermis honestatis est eu, mazim eirmod copiosae in cum, ei admodum efficiendi quo. Ut omnesque deleniti nominati vel, salutandi scriptorem in usu. Cu causae consectetuer sit, eos ex utroque consulatu. Ut quo bonorum nostrum, mucius definiebas no mea.
 Et everti dissentiet cum, nec eu primis pericula. Maiestatis assueverit vis no. Id eos probatus senserit, has tale probo cu. Est mazim doming causae et, vix ex odio mediocrem.

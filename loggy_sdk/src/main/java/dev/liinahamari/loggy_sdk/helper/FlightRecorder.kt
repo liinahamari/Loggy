@@ -42,11 +42,10 @@ class FlightRecorder private constructor() {
 
          fun getPriorityPattern(priority: Priority) = "$SEPARATOR${priority.name}$SEPARATOR"
 
-        fun lifecycle(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.LIFECYCLE, toPrintInLogcat)
+        fun lifecycle(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.L, toPrintInLogcat)
         fun i(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.I, toPrintInLogcat)
         fun d(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.D, toPrintInLogcat)
         fun w(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.W, toPrintInLogcat)
-        fun wtf(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.WTF, toPrintInLogcat)
 
         fun e(label: String, error: Throwable, toPrintInLogcat: Boolean = true) {
             val errorMessage = error.stackTrace.joinToString(
@@ -98,7 +97,6 @@ class FlightRecorder private constructor() {
         D,
         W,
         E,
-        WTF,
-        LIFECYCLE
+        L
     }
 }

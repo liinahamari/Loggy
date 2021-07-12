@@ -88,7 +88,7 @@ class LoggerInteractor @Inject constructor(
                     logs = logs.filterIsInstance<LogUi.ErrorLog>()
                 }
                 if (filterModes.contains(FilterMode.HIDE_LIFECYCLE)) {
-                    logs = logs.filter { logUi -> (logUi is LogUi.ErrorLog) || (logUi is LogUi.InfoLog && logUi.priority != FlightRecorder.Priority.LIFECYCLE) }
+                    logs = logs.filter { logUi -> (logUi is LogUi.ErrorLog) || (logUi is LogUi.InfoLog && logUi.priority != FlightRecorder.Priority.L) }
                 }
                 return@map if(logs.isNotEmpty()) GetRecordResult.Success(logs) else GetRecordResult.EmptyList
             }  else return@map it

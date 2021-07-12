@@ -24,7 +24,6 @@ import dev.liinahamari.loggy_sdk.helper.FlightRecorder.Companion.e
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder.Companion.i
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder.Companion.lifecycle
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder.Companion.w
-import dev.liinahamari.loggy_sdk.helper.FlightRecorder.Companion.wtf
 import dev.liinahamari.loggy_sdk.helper.toErrorLogMessage
 import dev.liinahamari.loggy_sdk.helper.toLogMessage
 import dev.liinahamari.loggy_sdk.helper.yellow
@@ -99,7 +98,7 @@ class FlightRecorderTest {
         lifecycle { text }
 
         assert(logsFile.length() > 0)
-        assertEquals(text.toLogMessage(FlightRecorder.Priority.LIFECYCLE).toByteArray().size.toLong(), logsFile.length())
+        assertEquals(text.toLogMessage(FlightRecorder.Priority.L).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
@@ -111,17 +110,6 @@ class FlightRecorderTest {
 
         assert(logsFile.length() > 0)
         assertEquals(text.toLogMessage(FlightRecorder.Priority.W).toByteArray().size.toLong(), logsFile.length())
-    }
-
-    @Test
-    fun `FlightRecorder is writing to file while wtf logging`() {
-        assertEquals(0, logsFile.length())
-        val text = "some_text"
-
-        wtf { text }
-
-        assert(logsFile.length() > 0)
-        assertEquals(text.toLogMessage(FlightRecorder.Priority.WTF).toByteArray().size.toLong(), logsFile.length())
     }
 
     @Test
