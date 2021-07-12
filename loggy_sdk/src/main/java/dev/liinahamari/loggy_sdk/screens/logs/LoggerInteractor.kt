@@ -56,8 +56,7 @@ class LoggerInteractor @Inject constructor(
                 val stackTraceLines = "(.*)(label:(.|\n)*)".toRegex().find(logMessage)!!.groupValues[2].split("\n")
                 LogUi.ErrorLog(
                     label = stackTraceLines.first(),
-                    stacktrace = stackTraceLines.subList(1, stackTraceLines.size)
-                        .joinToString(separator = "\n"),
+                    stacktrace = stackTraceLines.subList(1, stackTraceLines.size).joinToString(separator = "\n"),
                     time = SimpleDateFormat(DATE_PATTERN_FOR_LOGGING, Locale.UK).parse(time)!!.time,
                     thread = thread
                 )
@@ -82,7 +81,7 @@ class LoggerInteractor @Inject constructor(
             if (it is GetRecordResult.Success) {
                 var logs = it.logs
                 if (filterModes.contains(FilterMode.SHOW_NON_MAIN_THREAD)) {
-                    logs = logs.filter { logUi -> logUi.thread != "main" }
+                    logs = logs.filter { logUi -> logUi.thread.contains("main", ignoreCase = true).not() }
                 }
                 if (filterModes.contains(FilterMode.SHOW_ERRORS)) {
                     logs = logs.filterIsInstance<LogUi.ErrorLog>()
