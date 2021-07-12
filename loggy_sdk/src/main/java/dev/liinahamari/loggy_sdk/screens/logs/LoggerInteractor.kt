@@ -20,12 +20,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
 import dev.liinahamari.loggy_sdk.BuildConfig
-import dev.liinahamari.loggy_sdk.helper.DATE_PATTERN_FOR_LOGGING
-import dev.liinahamari.loggy_sdk.helper.createFileIfNotExist
-import dev.liinahamari.loggy_sdk.helper.BaseComposers
-import dev.liinahamari.loggy_sdk.helper.DEBUG_LOGS_DIR
-import dev.liinahamari.loggy_sdk.helper.FlightRecorder
-import dev.liinahamari.loggy_sdk.helper.SEPARATOR
+import dev.liinahamari.loggy_sdk.helper.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import java.io.*
@@ -89,8 +84,8 @@ class LoggerInteractor @Inject constructor(
                 if (filterModes.contains(FilterMode.HIDE_LIFECYCLE)) {
                     logs = logs.filter { logUi -> (logUi is LogUi.ErrorLog) || (logUi is LogUi.InfoLog && logUi.priority != FlightRecorder.Priority.L) }
                 }
-                return@map if(logs.isNotEmpty()) GetRecordResult.Success(logs) else GetRecordResult.EmptyList
-            }  else return@map it
+                return@map if (logs.isNotEmpty()) GetRecordResult.Success(logs) else GetRecordResult.EmptyList
+            } else return@map it
         }
         .compose(baseComposers.applyObservableSchedulers())
         .startWithItem(GetRecordResult.InProgress)
@@ -132,20 +127,20 @@ class LoggerInteractor @Inject constructor(
         .compose(baseComposers.applyCompletableSchedulers("Deleting $ZIPPED_LOGS_FILE_NAME"))
 }
 
- sealed class CreateZipLogsFileResult {
+sealed class CreateZipLogsFileResult {
     data class Success(val path: Uri) : CreateZipLogsFileResult()
     object IOError : CreateZipLogsFileResult()
     object InProgress : CreateZipLogsFileResult()
 }
 
- sealed class GetRecordResult {
+sealed class GetRecordResult {
     object EmptyList : GetRecordResult()
     object InProgress : GetRecordResult()
     data class Success(val logs: List<LogUi>) : GetRecordResult()
     object IOError : GetRecordResult()
 }
 
- sealed class ClearRecordResult {
+sealed class ClearRecordResult {
     object InProgress : ClearRecordResult()
     object Success : ClearRecordResult()
     object IOError : ClearRecordResult()

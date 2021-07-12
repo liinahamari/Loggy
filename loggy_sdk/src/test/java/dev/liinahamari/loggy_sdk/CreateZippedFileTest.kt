@@ -23,6 +23,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.DEBUG_LOGS_DIR
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
+import dev.liinahamari.loggy_sdk.helper.createFileIfNotExist
 import dev.liinahamari.loggy_sdk.rules.ImmediateSchedulersRule
 import dev.liinahamari.loggy_sdk.screens.logs.CreateZipLogsFileResult
 import dev.liinahamari.loggy_sdk.screens.logs.LoggerInteractor
@@ -100,6 +101,40 @@ class CreateZippedFileTest {
             assert(exists())
             assert(readLines().first { it.isNotBlank() }.trim() == LOREM.split("\n").first { it.isNotBlank() }.trim())
         }
+    }
+
+    @Test
+    fun `check there is only one zipped logs file on multiple createZippedLogsFile invocations`() {
+        shadowOf(getMainLooper()).idle()
+
+        val originText = "some_text"
+        logsFile.writeText(originText)
+        logsInteractor.createZippedLogsFile()
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValueCount(2)
+            .assertValueAt(0, CreateZipLogsFileResult.InProgress)
+            .assertValueAt(1) { it is CreateZipLogsFileResult.Success }
+
+        val zippedLogsFile = File(File(context.filesDir, DEBUG_LOGS_DIR), ZIPPED_LOGS_FILE_NAME)
+        assert(zippedLogsFile.exists())
+        assert(unzip(zippedLogsFile).readText() == originText)
+
+        val newText = "new_text"
+        logsFile.writeText(newText)
+        logsInteractor.createZippedLogsFile()
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValueCount(2)
+            .assertValueAt(0, CreateZipLogsFileResult.InProgress)
+            .assertValueAt(1) { it is CreateZipLogsFileResult.Success }
+
+        assert(zippedLogsFile.exists())
+        assert(zippedLogsFile.length() > 0)
+        assert(unzip(zippedLogsFile).readText() == newText)
+        assert(File(context.filesDir, DEBUG_LOGS_DIR).listFiles()!!.size == 1)
     }
 
     private fun unzip(zipFile: File): File {
