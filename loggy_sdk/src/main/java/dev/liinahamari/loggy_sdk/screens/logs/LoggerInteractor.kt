@@ -36,7 +36,7 @@ const val FILE_PROVIDER_META = ".fileprovider"
 const val ZIPPED_LOGS_FILE_NAME = "logs.zip"
 
 /** Be sure what it is matching pattern in use of FlightRecorder class*/
-val LOG_PATTERN_REGEX = "$SEPARATOR(\\w)$SEPARATOR\\s+(\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}:\\d{3})\\s$SEPARATOR([^$SEPARATOR]*)$SEPARATOR:\\s+((.|\n|\t)*)".toRegex()
+val LOG_PATTERN_REGEX = "$SEPARATOR(\\w)$SEPARATOR\\s+(\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}:\\d{3})\\s$SEPARATOR([^$SEPARATOR]*)$SEPARATOR:\\s+([\\s\\S]*)".toRegex()
 
 class LoggerInteractor @Inject constructor(
     private val applicationContext: Context,
@@ -48,7 +48,7 @@ class LoggerInteractor @Inject constructor(
         .map {
             val (priority, time, thread, logMessage) = LOG_PATTERN_REGEX.find(it)!!.groupValues.drop(1)
             if (priority == FlightRecorder.Priority.E.name) {
-                val stackTraceLines = "(.*)(label:(.|\n)*)".toRegex().find(logMessage)!!.groupValues[2].split("\n")
+                val stackTraceLines = "\\s?label:([\\s\\S]*)".toRegex().find(logMessage)!!.groupValues[1].split("\n")
                 LogUi.ErrorLog(
                     label = stackTraceLines.first(),
                     stacktrace = stackTraceLines.subList(1, stackTraceLines.size).joinToString(separator = "\n"),
