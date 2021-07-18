@@ -24,6 +24,7 @@ import dev.liinahamari.loggy_sdk.helper.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import java.io.*
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -46,29 +47,33 @@ class LoggerInteractor @Inject constructor(
     fun getEntireRecord(): Observable<GetRecordResult> = Observable.fromCallable { FlightRecorder.getEntireRecord() }
         .concatMapIterable { it.split("\n\n".toRegex()).filter { line -> line.isNotBlank() } }
         .map {
-            val (priority, time, thread, logMessage) = LOG_PATTERN_REGEX.find(it)!!.groupValues.drop(1)
-            if (priority == FlightRecorder.Priority.E.name) {
-                val stackTraceLines = "\\s?label:([\\s\\S]*)".toRegex().find(logMessage)!!.groupValues[1].split("\n")
-                LogUi.ErrorLog(
-                    label = stackTraceLines.first(),
-                    stacktrace = stackTraceLines.subList(1, stackTraceLines.size).joinToString(separator = "\n"),
-                    time = SimpleDateFormat(DATE_PATTERN_FOR_LOGGING, Locale.UK).parse(time)!!.time,
-                    thread = thread
-                )
-            } else {
-                LogUi.InfoLog(
-                    message = it,
-                    time = SimpleDateFormat(DATE_PATTERN_FOR_LOGGING, Locale.UK).parse(time)!!.time,
-                    thread = thread,
-                    priority = FlightRecorder.Priority.valueOf(priority)
-                )
+            try {
+                val (priority, time, thread, logMessage) = LOG_PATTERN_REGEX.find(it)!!.groupValues.drop(1)
+                if (priority == FlightRecorder.Priority.E.name) {
+                    val stackTraceLines = "\\s?label:([\\s\\S]*)".toRegex().find(logMessage)!!.groupValues[1].split("\n")
+                    LogUi.ErrorLog(
+                        label = stackTraceLines.first(),
+                        stacktrace = stackTraceLines.subList(1, stackTraceLines.size).joinToString(separator = "\n"),
+                        time = SimpleDateFormat(DATE_PATTERN_FOR_LOGGING, Locale.UK).parse(time)!!.time,
+                        thread = thread
+                    )
+                } else {
+                    LogUi.InfoLog(
+                        message = it,
+                        time = SimpleDateFormat(DATE_PATTERN_FOR_LOGGING, Locale.UK).parse(time)!!.time,
+                        thread = thread,
+                        priority = FlightRecorder.Priority.valueOf(priority)
+                    )
+                }
+            } catch (e: Throwable) {
+                throw ParseException("Malformed log: {$it}", 0)
             }
         }
         .toList()
         .toObservable()
         .compose(baseComposers.applyObservableSchedulers())
         .map { if (it.isNotEmpty()) GetRecordResult.Success(it) else GetRecordResult.EmptyList }
-        .onErrorReturn { GetRecordResult.IOError }
+        .onErrorReturn { if(it is ParseException) GetRecordResult.Error.LogParsingError(it.message!!) else GetRecordResult.Error.IOError }
         .startWithItem(GetRecordResult.InProgress)
 
     fun sortLogs(filterModes: List<FilterMode>): Observable<GetRecordResult> = getEntireRecord()
@@ -137,7 +142,10 @@ sealed class GetRecordResult {
     object EmptyList : GetRecordResult()
     object InProgress : GetRecordResult()
     data class Success(val logs: List<LogUi>) : GetRecordResult()
-    object IOError : GetRecordResult()
+    sealed class Error: GetRecordResult() {
+        data class LogParsingError(val errorCause: String): Error()
+        object IOError : Error()
+    }
 }
 
 sealed class ClearRecordResult {

@@ -44,8 +44,12 @@ import javax.inject.Inject
                     _displayLogsEvent.value = it.logs
                     _loadingEvent.value = false
                 }
-                is GetRecordResult.IOError -> {
+                is GetRecordResult.Error.IOError -> {
                     _errorEvent.value = R.string.io_error
+                    _loadingEvent.value = false
+                }
+                is GetRecordResult.Error.LogParsingError -> {
+                    _errorEvent.value = R.string.error_parsing_logs
                     _loadingEvent.value = false
                 }
                 is GetRecordResult.EmptyList -> {
@@ -64,7 +68,11 @@ import javax.inject.Inject
                     _displayLogsEvent.value = sortedLogs.logs
                     _loadingEvent.value = false
                 }
-                is GetRecordResult.IOError -> {
+                is GetRecordResult.Error.LogParsingError -> { //todo refactor
+                    _errorEvent.value = R.string.error_parsing_logs
+                    _loadingEvent.value = false
+                }
+                is GetRecordResult.Error.IOError -> {
                     _errorEvent.value = R.string.io_error
                     _loadingEvent.value = false
                 }

@@ -75,7 +75,7 @@ class FlightRecorder private constructor() {
         }
 
 
-        fun getEntireRecord() = try {
+        fun getEntireRecord(): String = try {
             logStorage.readText()
         } catch (e: FileNotFoundException) {
             logStorage.createNewFile()
