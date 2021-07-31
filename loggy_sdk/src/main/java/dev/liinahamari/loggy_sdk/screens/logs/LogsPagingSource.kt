@@ -22,11 +22,11 @@ import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
 class LogsPagingSource @Inject constructor(private val loggerInteractor: LoggerInteractor) : RxPagingSource<Int, LogUi>() {
-    override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, LogUi>> = loggerInteractor.getEntireRecord(params.key ?: 1)
+    override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, LogUi>> = loggerInteractor.getEntireRecord(params.key ?: 0)
         .doOnError { it.printStackTrace() }
         .map {
             if (it is GetRecordResult.Success) {
-                toLoadResult(it.logs, params.key ?: 1)
+                toLoadResult(it.logs, params.key ?: 0)
             } else {
                 LoadResult.Error(IllegalStateException())
             }
@@ -35,7 +35,7 @@ class LogsPagingSource @Inject constructor(private val loggerInteractor: LoggerI
 
     private fun toLoadResult(data: List<LogUi>, lastIndex: Int): LoadResult<Int, LogUi> = LoadResult.Page(
         data = data,
-        prevKey = if (lastIndex == 1) null else lastIndex - 1,
+        prevKey = if (lastIndex == 0) null else lastIndex - 1,
         nextKey = if (data.size < PAGE_CAPACITY) null else lastIndex + 1
     )
 
