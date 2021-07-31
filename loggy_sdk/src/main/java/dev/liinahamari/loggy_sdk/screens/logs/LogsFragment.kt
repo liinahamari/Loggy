@@ -36,6 +36,7 @@ import dev.liinahamari.loggy_sdk.helper.CustomToast.infoToast
 import dev.liinahamari.loggy_sdk.helper.CustomToast.successToast
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
 import io.reactivex.rxjava3.kotlin.addTo
+import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.fragment_logs.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -59,21 +60,20 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
     }
 
     private val viewModel by viewModels<LogsViewModel> { viewModelFactory }
-    private lateinit var logsAdapter: LogsAdapter
+    private val logsAdapter: LogsAdapter by lazy { LogsAdapter() }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        logsAdapter = LogsAdapter()
         logsRv.apply {
             layoutManager = LinearLayoutManager(requireActivity())
             adapter = logsAdapter
+            itemAnimator = SlideInLeftAnimator()
         }
-        subscriptions.add(
-            viewModel.logs.subscribe {
-                logsAdapter.submitData(lifecycle, it)
-            }
-        )
+
+        viewModel.logs.subscribe {
+            logsAdapter.submitData(lifecycle, it)
+        }?.addTo(subscriptions)
     }
 
     override fun setupViewModelSubscriptions() {
