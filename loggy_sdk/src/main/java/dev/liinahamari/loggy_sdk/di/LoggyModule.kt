@@ -20,6 +20,7 @@ import android.app.Application
 import android.content.Context
 import dagger.Module
 import dagger.Provides
+import dev.liinahamari.loggy_sdk.db.LogToLogUiMapper
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.screens.logs.LoggerInteractor
 import java.io.File
@@ -32,7 +33,7 @@ const val APPLICATION_CONTEXT = "app_context"
 open class LoggyModule {
     @Provides
     @Singleton
-    open fun provideLoggerInteractor(@Named(APPLICATION_CONTEXT) appContext: Context, composers: BaseComposers, logFile: File): LoggerInteractor = LoggerInteractor(appContext, composers, logFile)
+    open fun provideLoggerInteractor(composers: BaseComposers, logToLogUiMapper: LogToLogUiMapper): LoggerInteractor = LoggerInteractor(logToLogUiMapper, composers)
 
     @Provides
     @Singleton
@@ -42,4 +43,8 @@ open class LoggyModule {
     @Provides
     @Singleton
     fun provideComposers(): BaseComposers = BaseComposers()
+
+    @Provides
+    @Singleton
+    fun provideLogToLogUiMapper(): LogToLogUiMapper = LogToLogUiMapper()
 }

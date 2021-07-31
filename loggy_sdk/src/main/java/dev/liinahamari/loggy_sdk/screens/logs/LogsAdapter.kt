@@ -23,51 +23,46 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnLayout
 import androidx.databinding.DataBindingUtil
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding4.view.clicks
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.databinding.ItemErrorLogBinding
 import dev.liinahamari.loggy_sdk.databinding.ItemInfoLogBinding
+import dev.liinahamari.loggy_sdk.databinding.ItemPlaceholderBinding
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_error_log.*
+import java.lang.IllegalStateException
 
-private const val LOG_TYPE_INFO = 1
-private const val LOG_TYPE_ERROR = 2
-
- class LogsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR) {
     private val clicks = CompositeDisposable()
     private lateinit var expandedMarkers: SparseBooleanArray
     private var errorItemHeight = -1
 
-    var logs: List<LogUi> = emptyList()
-        set(value) {
-            field = value
-            expandedMarkers = SparseBooleanArray(value.size)
-            notifyDataSetChanged()
-        }
-
-    override fun getItemCount() = logs.size
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) = clicks.clear()
 
-    override fun getItemViewType(position: Int): Int = when (logs[position]) {
-        is LogUi.InfoLog -> LOG_TYPE_INFO
-        is LogUi.ErrorLog -> LOG_TYPE_ERROR
+    override fun getItemViewType(position: Int): Int = when (getItem(position)) {
+        is LogUi.InfoLog -> R.layout.item_info_log
+        is LogUi.ErrorLog -> R.layout.item_error_log
+        else -> R.layout.item_placeholder //paging library returns nulls when no data ready at the moment
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder = when (viewType) {
-        LOG_TYPE_INFO -> InfoLogViewHolder(ItemInfoLogBinding.inflate(LayoutInflater.from(parent.context), parent, false).root)
-        LOG_TYPE_ERROR -> ErrorLogViewHolder(ItemErrorLogBinding.inflate(LayoutInflater.from(parent.context), parent, false).root)
+        R.layout.item_info_log -> InfoLogViewHolder(ItemInfoLogBinding.inflate(LayoutInflater.from(parent.context), parent, false).root)
+        R.layout.item_error_log -> ErrorLogViewHolder(ItemErrorLogBinding.inflate(LayoutInflater.from(parent.context), parent, false).root)
+        R.layout.item_placeholder -> PlaceholderViewHolder(ItemPlaceholderBinding.inflate(LayoutInflater.from(parent.context), parent, false).root)
         else -> throw IllegalStateException()
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ErrorLogViewHolder -> holder.bind(position)
-            is InfoLogViewHolder -> holder.binding?.infoLog = logs[position] as LogUi.InfoLog
-            else -> throw IllegalStateException()
+            is InfoLogViewHolder -> holder.binding?.infoLog = getItem(position) as LogUi.InfoLog
+            else -> Unit
         }
     }
 
@@ -75,7 +70,7 @@ private const val LOG_TYPE_ERROR = 2
         private val binding: ItemErrorLogBinding? = DataBindingUtil.bind(containerView)
 
         fun bind(position: Int) {
-            binding?.errorLog = logs[position] as LogUi.ErrorLog
+            binding?.errorLog = getItem(position) as LogUi.ErrorLog
 
             itemView.doOnLayout {
                 if (errorItemHeight == -1) {
@@ -112,4 +107,15 @@ private const val LOG_TYPE_ERROR = 2
     private inner class InfoLogViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
         val binding: ItemInfoLogBinding? = DataBindingUtil.bind(containerView)
     }
+
+    private inner class PlaceholderViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
+        val binding: ItemInfoLogBinding? = DataBindingUtil.bind(containerView)
+    }
+
+     companion object {
+         private val COMPARATOR = object : DiffUtil.ItemCallback<LogUi>() {
+             override fun areItemsTheSame(oldItem: LogUi, newItem: LogUi) = oldItem.time == newItem.time
+             override fun areContentsTheSame(oldItem: LogUi, newItem: LogUi) = oldItem == newItem
+         }
+     }
 }

@@ -18,13 +18,19 @@ package dev.liinahamari.loggy_sdk.screens.logs
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.rxjava3.flowable
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseViewModel
 import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.plusAssign
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
- class LogsViewModel @Inject constructor(private val loggerInteractor: LoggerInteractor) : BaseViewModel() {
+class LogsViewModel @Inject constructor(private val loggerInteractor: LoggerInteractor, private val pagingSource: LogsPagingSource) : BaseViewModel() {
     private val _loadingEvent = SingleLiveEvent<Boolean>()
     val loadingEvent: LiveData<Boolean> get() = _loadingEvent
 
@@ -37,63 +43,27 @@ import javax.inject.Inject
     private val _displayLogsEvent = SingleLiveEvent<List<LogUi>>()
     val displayLogsEvent: LiveData<List<LogUi>> get() = _displayLogsEvent
 
-    fun fetchLogs() {
-        disposable += loggerInteractor.getEntireRecord().subscribe {
-            when (it) {
-                is GetRecordResult.Success -> {
-                    _displayLogsEvent.value = it.logs
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.Error.IOError -> {
-                    _errorEvent.value = R.string.io_error
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.Error.LogParsingError -> {
-                    _errorEvent.value = R.string.error_parsing_logs
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.EmptyList -> {
-                    _emptyLogListEvent.call()
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.InProgress -> _loadingEvent.value = true
-            }
-        }
-    }
-
-    fun sortLogs(filterModes: List<FilterMode>) {
-        disposable += loggerInteractor.sortLogs(filterModes).subscribe { sortedLogs ->
-            when (sortedLogs) {
-                is GetRecordResult.Success -> {
-                    _displayLogsEvent.value = sortedLogs.logs
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.Error.LogParsingError -> { //todo refactor
-                    _errorEvent.value = R.string.error_parsing_logs
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.Error.IOError -> {
-                    _errorEvent.value = R.string.io_error
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.EmptyList -> {
-                    _emptyLogListEvent.call()
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.InProgress -> _loadingEvent.value = true
-            }
-        }
-    }
+    @ExperimentalCoroutinesApi
+    val logs: Flowable<PagingData<LogUi>> = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_CAPACITY.toInt(),
+            enablePlaceholders = true,
+            maxSize = (PAGE_CAPACITY * 5).toInt(),
+            prefetchDistance = 1,
+            initialLoadSize = PAGE_CAPACITY.toInt()
+        ),
+        pagingSourceFactory = { pagingSource }
+    ).flowable
 
     fun clearLogs() {
-        disposable += loggerInteractor.clearEntireRecord().subscribe {
+        disposable += loggerInteractor.clearEntireRecord().subscribe { it ->
             when (it) {
                 is ClearRecordResult.Success -> {
                     _emptyLogListEvent.call()
                     _loadingEvent.value = false
                 }
-                is ClearRecordResult.IOError -> {
-                    _errorEvent.value = R.string.io_error
+                is ClearRecordResult.Error.IOError -> {
+                    _errorEvent.value = R.string.io_error //fixme error message
                     _loadingEvent.value = false
                 }
                 is ClearRecordResult.InProgress -> _loadingEvent.value = true
@@ -101,6 +71,7 @@ import javax.inject.Inject
         }
     }
 
+/*
     fun createZippedLogsFile() {
         disposable += loggerInteractor.createZippedLogsFile().subscribe {
             when (it) {
@@ -120,4 +91,5 @@ import javax.inject.Inject
     fun deleteZippedLogs() {
         disposable += loggerInteractor.deleteZippedLogs().subscribe()
     }
+*/
 }

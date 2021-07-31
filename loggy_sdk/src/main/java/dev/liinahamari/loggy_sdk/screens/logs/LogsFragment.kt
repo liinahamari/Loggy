@@ -19,7 +19,6 @@ package dev.liinahamari.loggy_sdk.screens.logs
 
 import android.app.Activity.RESULT_OK
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -36,8 +35,9 @@ import dev.liinahamari.loggy_sdk.helper.CustomToast.errorToast
 import dev.liinahamari.loggy_sdk.helper.CustomToast.infoToast
 import dev.liinahamari.loggy_sdk.helper.CustomToast.successToast
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
-import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.android.synthetic.main.fragment_logs.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 private const val FILE_SENDING_REQUEST_CODE = 1011010
 private const val TEXT_TYPE = "text/plain"
@@ -59,19 +59,21 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
     }
 
     private val viewModel by viewModels<LogsViewModel> { viewModelFactory }
-    private val logsAdapter = LogsAdapter()
+    private lateinit var logsAdapter: LogsAdapter
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        viewModel.fetchLogs()
-    }
-
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        logsAdapter = LogsAdapter()
         logsRv.apply {
             layoutManager = LinearLayoutManager(requireActivity())
             adapter = logsAdapter
         }
+        subscriptions.add(
+            viewModel.logs.subscribe {
+                logsAdapter.submitData(lifecycle, it)
+            }
+        )
     }
 
     override fun setupViewModelSubscriptions() {
@@ -82,7 +84,6 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
         viewModel.emptyLogListEvent.observe(this, {
             emptyLogsTv.isVisible = true
             logsRv.isVisible = false
-            logsAdapter.logs = emptyList()
         })
 
         viewModel.loadingEvent.observe(this, { toShow ->
@@ -95,7 +96,6 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
         viewModel.displayLogsEvent.observe(this, {
             emptyLogsTv.isVisible = false
             logsRv.isVisible = true
-            logsAdapter.logs = it
         })
 
         viewModel.logFilePathEvent.observe(this, {
@@ -124,23 +124,23 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
             } else {
                 infoToast(R.string.error_sending_logs)
             }
-            viewModel.deleteZippedLogs()
+//            viewModel.deleteZippedLogs()
         }
     }
 
     override fun setupClicks() {
-        subscriptions += clearLogsFab
-            .clicks()
-            .throttleFirst()
-            .subscribe {
+        clearLogsFab
+            ?.clicks()
+            ?.throttleFirst()
+            ?.subscribe {
                 fabMenu.isVisible = false
                 viewModel.clearLogs()
-            }
+            }?.addTo(subscriptions)
 
-        subscriptions += filterLogsFab
-            .clicks()
-            .throttleFirst()
-            .subscribe {
+        filterLogsFab
+            ?.clicks()
+            ?.throttleFirst()
+            ?.subscribe {
                 fabMenu.isVisible = false
 
                 MaterialDialog(requireContext()).show {
@@ -178,32 +178,34 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
                                 }
                             }
                         }.also {
-                            viewModel.sortLogs(it)
+//                            viewModel.sortLogs(it)
                         }
                     }
                     negativeButton(android.R.string.cancel) {}
                 }
-            }
+            }?.addTo(subscriptions)
 
-        subscriptions += sendLogsToDeveloperFab
-            .clicks()
-            .throttleFirst()
-            .subscribe {
+/*
+        sendLogsToDeveloperFab
+            ?.clicks()
+            ?.throttleFirst()
+            ?.subscribe {
                 fabMenu.isVisible = false
                 viewModel.createZippedLogsFile()
-            }
+            }?.addTo(subscriptions)
+*/
 
-        subscriptions += mainFab
-            .clicks()
-            .throttleFirst()
-            .subscribe {
+        mainFab
+            ?.clicks()
+            ?.throttleFirst()
+            ?.subscribe {
                 fabMenu.isVisible = false
                 if (isFabMenuOpened.not()) {
                     showFabMenu()
                 } else {
                     closeFabMenu()
                 }
-            }
+            }?.addTo(subscriptions)
     }
 
     private fun showFabMenu() {

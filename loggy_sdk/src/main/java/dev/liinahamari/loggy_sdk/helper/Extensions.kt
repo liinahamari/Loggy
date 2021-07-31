@@ -42,13 +42,5 @@ fun Context.createFileIfNotExist(fileName: String, dirName: String) = File(creat
 /** Only for RxView elements!*/
  fun Observable<Unit>.throttleFirst(skipDurationMillis: Long = 500L): Observable<Unit> = compose { it.throttleFirst(skipDurationMillis, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()) }
 
-
- fun String.toLogMessage(priority: FlightRecorder.Priority) = "${FlightRecorder.getPriorityPattern(priority)}  ${now()} $SEPARATOR${Thread.currentThread().name}$SEPARATOR: $this\n\n"
-
- fun Throwable.toErrorLogMessage(label: String) = stackTrace.joinToString(
-    separator = "\n\t",
-    prefix = "label: $label\n${message}\n\t"
-).toLogMessage(FlightRecorder.Priority.E)
-
  fun String.yellow() = 27.toChar() + "[33m$this" + 27.toChar() + "[0m"
  fun String.red() = 27.toChar() + "[31m$this" + 27.toChar() + "[0m"
