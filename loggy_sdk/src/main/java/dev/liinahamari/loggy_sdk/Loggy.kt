@@ -20,8 +20,6 @@ import android.app.Application
 import dev.liinahamari.loggy_sdk.db.ObjectBox
 import dev.liinahamari.loggy_sdk.di.DaggerLoggyComponent
 import dev.liinahamari.loggy_sdk.di.LoggyComponent
-import dev.liinahamari.loggy_sdk.helper.getFreeSpaceInBytes
-import dev.liinahamari.loggy_sdk.helper.isStorageSpaceAvailable
 import java.io.File
 
 object Loggy {

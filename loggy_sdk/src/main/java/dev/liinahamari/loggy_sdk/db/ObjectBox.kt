@@ -24,8 +24,10 @@ object ObjectBox {
         private set
 
     fun init(context: Context) {
-        store = MyObjectBox.builder()
-            .androidContext(context.applicationContext)
-            .build()
+        if (::store.isInitialized.not()) {
+            store = MyObjectBox.builder()
+                .androidContext(context.applicationContext)
+                .build()
+        }
     }
 }

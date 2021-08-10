@@ -62,7 +62,7 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
     private val viewModel by viewModels<LogsViewModel> { viewModelFactory }
     private val logsAdapter: LogsAdapter by lazy { LogsAdapter() }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         logsRv.apply {
