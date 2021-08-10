@@ -39,7 +39,7 @@ import kotlinx.android.synthetic.main.item_error_log.*
 
 class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR) {
     private val clicks = CompositeDisposable()
-    private lateinit var expandedMarkers: SparseBooleanArray
+    private val expandedMarkers = SparseBooleanArray()
     private var errorItemHeight = -1
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) = clicks.clear()

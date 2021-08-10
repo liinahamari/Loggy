@@ -54,9 +54,9 @@ class FlightRecorder private constructor() {
                     return@fromCallable logMessage.split("\n")
                         .takeIf { it.size > 1 }
                         ?.let {
-                            it[0] to logMessage.split("\n")
+                            it[0] to it
                                 .drop(1)
-                                .joinToString { "\n" }
+                                .joinToString("\n\t")
                         } ?: logMessage.take(100).plus("...") to logMessage.drop(100)
                 }
                     .doOnSuccess {
