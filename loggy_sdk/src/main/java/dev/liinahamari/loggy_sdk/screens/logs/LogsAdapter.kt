@@ -36,7 +36,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_error_log.*
-import java.lang.IllegalStateException
 
 class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR) {
     private val clicks = CompositeDisposable()
@@ -109,7 +108,7 @@ class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR
     }
 
     private inner class PlaceholderViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
-        val binding: ItemInfoLogBinding? = DataBindingUtil.bind(containerView)
+        val binding: ItemPlaceholderBinding? = DataBindingUtil.bind(containerView)
     }
 
      companion object {
