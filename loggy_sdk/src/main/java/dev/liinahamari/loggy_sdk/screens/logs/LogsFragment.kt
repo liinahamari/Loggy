@@ -36,7 +36,7 @@ import dev.liinahamari.loggy_sdk.helper.CustomToast.infoToast
 import dev.liinahamari.loggy_sdk.helper.CustomToast.successToast
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
 import io.reactivex.rxjava3.kotlin.addTo
-import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
+import jp.wasabeef.recyclerview.animators.FadeInAnimator
 import kotlinx.android.synthetic.main.fragment_logs.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -67,8 +67,8 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
         super.onViewCreated(view, savedInstanceState)
         logsRv.apply {
             layoutManager = LinearLayoutManager(requireActivity())
+            itemAnimator = FadeInAnimator()
             adapter = logsAdapter
-            itemAnimator = SlideInLeftAnimator()
         }
 
         viewModel.logs.subscribe {
