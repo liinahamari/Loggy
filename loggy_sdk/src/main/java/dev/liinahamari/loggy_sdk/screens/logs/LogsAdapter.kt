@@ -40,7 +40,7 @@ import kotlinx.android.synthetic.main.item_error_log.*
 class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR) {
     private val clicks = CompositeDisposable()
     private val expandedMarkers = SparseBooleanArray()
-    private var errorItemHeight = -1
+    private var expandableItemHeight = -1
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) = clicks.clear()
 
@@ -60,7 +60,7 @@ class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ErrorLogViewHolder -> holder.bind(position)
-            is InfoLogViewHolder -> holder.binding?.infoLog = getItem(position) as LogUi.InfoLog
+            is InfoLogViewHolder -> holder.bind(position, getItem(position) as LogUi.InfoLog)
             else -> Unit
         }
     }
@@ -72,19 +72,20 @@ class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR
             binding?.errorLog = getItem(position) as LogUi.ErrorLog
 
             itemView.doOnLayout {
-                if (errorItemHeight == -1) {
-                    errorItemHeight = (itemView.height - itemView.context.resources.getDimensionPixelSize(
-                        R.dimen.arrow_button_height)) / 2
+                if (expandableItemHeight == -1) {
+                    expandableItemHeight = (itemView.height - itemView.context.resources.getDimensionPixelSize(
+                        R.dimen.arrow_button_height
+                    )) / 2
                     arrowBtn.layoutParams = (arrowBtn.layoutParams as ConstraintLayout.LayoutParams).apply {
-                        setMargins(0, errorItemHeight, 0, 0)
+                        setMargins(0, expandableItemHeight, 0, 0)
                     }
                 }
             }
 
-            if (errorItemHeight != -1) {
+            if (expandableItemHeight != -1) {
                 /** expedient duplicated code */
                 arrowBtn.layoutParams = (arrowBtn.layoutParams as ConstraintLayout.LayoutParams).apply {
-                    setMargins(0, errorItemHeight, 0, 0)
+                    setMargins(0, expandableItemHeight, 0, 0)
                 }
             }
 
@@ -105,16 +106,51 @@ class LogsAdapter : PagingDataAdapter<LogUi, RecyclerView.ViewHolder>(COMPARATOR
 
     private inner class InfoLogViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
         val binding: ItemInfoLogBinding? = DataBindingUtil.bind(containerView)
+
+        fun bind(position: Int, infoLog: LogUi.InfoLog) {
+            itemView.doOnLayout {
+                if (expandableItemHeight == -1) {
+                    expandableItemHeight = (itemView.height - itemView.context.resources.getDimensionPixelSize(
+                        R.dimen.arrow_button_height
+                    )) / 2
+                    arrowBtn.layoutParams = (arrowBtn.layoutParams as ConstraintLayout.LayoutParams).apply {
+                        setMargins(0, expandableItemHeight, 0, 0)
+                    }
+                }
+            }
+
+            if (expandableItemHeight != -1) {
+                /** expedient duplicated code */
+                arrowBtn.layoutParams = (arrowBtn.layoutParams as ConstraintLayout.LayoutParams).apply {
+                    setMargins(0, expandableItemHeight, 0, 0)
+                }
+            }
+
+            binding?.infoLog = infoLog
+
+            with(expandedMarkers[position]) {
+                arrowBtn.rotation = if (this) 180f else 0f
+                expandableLayout.setExpanded(this, false)
+            }
+
+            clicks += itemView.clicks()
+                .throttleFirst()
+                .map { expandableLayout.isExpanded.not() }
+                .subscribe {
+                    expandedMarkers.put(position, it)
+                    notifyItemChanged(position)
+                }
+        }
     }
 
     private inner class PlaceholderViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
         val binding: ItemPlaceholderBinding? = DataBindingUtil.bind(containerView)
     }
 
-     companion object {
-         private val COMPARATOR = object : DiffUtil.ItemCallback<LogUi>() {
-             override fun areItemsTheSame(oldItem: LogUi, newItem: LogUi) = oldItem.time == newItem.time
-             override fun areContentsTheSame(oldItem: LogUi, newItem: LogUi) = oldItem == newItem
-         }
-     }
+    companion object {
+        private val COMPARATOR = object : DiffUtil.ItemCallback<LogUi>() {
+            override fun areItemsTheSame(oldItem: LogUi, newItem: LogUi) = oldItem.time == newItem.time
+            override fun areContentsTheSame(oldItem: LogUi, newItem: LogUi) = oldItem == newItem
+        }
+    }
 }

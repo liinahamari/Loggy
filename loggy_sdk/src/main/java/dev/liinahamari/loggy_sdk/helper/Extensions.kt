@@ -6,6 +6,7 @@ import android.os.storage.StorageManager
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import java.io.File
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit
  *  */
 const val DATE_PATTERN_FOR_LOGGING = "yyyy-MM-dd HH:mm:ss:SSS"
 fun now(): String = SimpleDateFormat(DATE_PATTERN_FOR_LOGGING, Locale.getDefault()).format(Date())
+fun Long.toReadableDate(): String = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, Locale.UK).format(Date(this))
 
 fun Context.isStorageSpaceAvailable(fileToStoreSize: Int): Boolean = getFreeSpaceInBytes() > fileToStoreSize
 
@@ -40,7 +42,9 @@ fun Context.createFileIfNotExist(fileName: String, dirName: String) = File(creat
 }
 
 /** Only for RxView elements!*/
- fun Observable<Unit>.throttleFirst(skipDurationMillis: Long = 500L): Observable<Unit> = compose { it.throttleFirst(skipDurationMillis, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()) }
+fun Observable<Unit>.throttleFirst(skipDurationMillis: Long = 500L): Observable<Unit> = compose { it.throttleFirst(skipDurationMillis, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()) }
 
- fun String.yellow() = 27.toChar() + "[33m$this" + 27.toChar() + "[0m"
- fun String.red() = 27.toChar() + "[31m$this" + 27.toChar() + "[0m"
+fun String.yellow() = 27.toChar() + "[33m$this" + 27.toChar() + "[0m"
+fun String.red() = 27.toChar() + "[31m$this" + 27.toChar() + "[0m"
+
+

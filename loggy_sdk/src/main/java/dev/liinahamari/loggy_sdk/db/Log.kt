@@ -23,7 +23,7 @@ import io.objectbox.annotation.Id
 data class Log(
     @Id var id: Long = 0L,
     var timestamp: Long = 0L,
-    var title: String = "placeholder_tag",
+    var title: String? = null,
     var priority: Int = -1,
     var body: String = "placeholder_body",
     var thread: String = "placeholder_thread"

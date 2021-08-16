@@ -30,7 +30,8 @@ class LogToLogUiMapper @Inject constructor() {
         )
     } else {
         LogUi.InfoLog(
-            message = log.title,
+            title = log.title,
+            body = log.body,
             time = log.timestamp,
             thread = log.thread,
             priority = FlightRecorder.Priority.values()[log.priority]
