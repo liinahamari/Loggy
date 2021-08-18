@@ -17,20 +17,21 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package dev.liinahamari.loggy_sdk
 
 import android.app.Application
-import dev.liinahamari.loggy_sdk.db.ObjectBox
+import androidx.annotation.VisibleForTesting
+import dev.liinahamari.loggy_sdk.db.MyObjectBox
 import dev.liinahamari.loggy_sdk.di.DaggerLoggyComponent
 import dev.liinahamari.loggy_sdk.di.LoggyComponent
-import java.io.File
+import io.objectbox.BoxStore
 
 object Loggy {
     lateinit var loggyComponent: LoggyComponent
 
-    fun init(application: Application, logFile: File, integratorEmail: String, userId: String) {
-        ObjectBox.init(application.applicationContext)
+    @VisibleForTesting
+    fun initForTest(application: Application) = init(application, "", "")
 
+    fun init(application: Application, integratorEmail: String, userId: String) {
         loggyComponent = DaggerLoggyComponent.builder()
             .application(application)
-            .logFile(logFile)
             .email(integratorEmail)
             .userId(userId)
             .build()

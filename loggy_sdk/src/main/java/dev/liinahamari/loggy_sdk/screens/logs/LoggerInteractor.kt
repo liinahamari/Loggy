@@ -19,7 +19,6 @@ package dev.liinahamari.loggy_sdk.screens.logs
 import dev.liinahamari.loggy_sdk.db.Log
 import dev.liinahamari.loggy_sdk.db.LogToLogUiMapper
 import dev.liinahamari.loggy_sdk.db.Log_
-import dev.liinahamari.loggy_sdk.db.ObjectBox
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import io.objectbox.Box
 import io.reactivex.rxjava3.core.Observable
@@ -28,9 +27,7 @@ import javax.inject.Inject
 
 const val PAGE_CAPACITY = 20L
 
-class LoggerInteractor @Inject constructor(private val logMapper: LogToLogUiMapper, private val baseComposers: BaseComposers) {
-    private val logBox: Box<Log> = ObjectBox.store.boxFor(Log::class.java)
-
+class LoggerInteractor @Inject constructor(private val logMapper: LogToLogUiMapper, private val baseComposers: BaseComposers, private val logBox: Box<Log>) {
     fun getEntireRecord(page: Int): Single<GetRecordResult> = Single.fromCallable {
         logBox.query()
             .order(Log_.timestamp)

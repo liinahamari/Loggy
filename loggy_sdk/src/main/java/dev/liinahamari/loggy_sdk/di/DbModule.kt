@@ -14,20 +14,27 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.liinahamari.loggy_sdk.db
+package dev.liinahamari.loggy_sdk.di
 
 import android.content.Context
+import dagger.Module
+import dagger.Provides
+import dev.liinahamari.loggy_sdk.db.Log
+import dev.liinahamari.loggy_sdk.db.MyObjectBox
+import io.objectbox.Box
 import io.objectbox.BoxStore
+import javax.inject.Named
+import javax.inject.Singleton
 
-object ObjectBox {
-    lateinit var store: BoxStore
-        private set
+@Module
+open class DbModule {
+    @Provides
+    @Singleton
+    fun provideBoxStore(@Named(APPLICATION_CONTEXT) context: Context): BoxStore = MyObjectBox.builder()
+        .androidContext(context)
+        .build()
 
-    fun init(context: Context) {
-        if (::store.isInitialized.not()) {
-            store = MyObjectBox.builder()
-                .androidContext(context.applicationContext)
-                .build()
-        }
-    }
+    @Provides
+    @Singleton
+    fun provideLogBox(boxStore: BoxStore): Box<Log> = boxStore.boxFor(Log::class.java)
 }

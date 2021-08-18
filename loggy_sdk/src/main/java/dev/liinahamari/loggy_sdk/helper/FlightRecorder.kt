@@ -18,13 +18,14 @@ package dev.liinahamari.loggy_sdk.helper
 
 import androidx.annotation.VisibleForTesting
 import dev.liinahamari.loggy_sdk.BuildConfig
+import dev.liinahamari.loggy_sdk.Loggy
 import dev.liinahamari.loggy_sdk.db.Log
-import dev.liinahamari.loggy_sdk.db.ObjectBox
 import io.objectbox.Box
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.lang.System.currentTimeMillis
+import javax.inject.Inject
 
 typealias LogTitle = String
 typealias LogBody = String
@@ -34,74 +35,84 @@ const val DEBUG_LOGS_DIR = "SharedLogs"
 
 const val MESSAGE_LENGTH_THRESHOLD = 100
 
-class FlightRecorder private constructor() {
-    companion object {
-        private val logStorage: Box<Log> by lazy { ObjectBox.store.boxFor(Log::class.java) }
+/** Workaround for injection into Kotlin's object*/
+open class LogBoxInjector {
+    @Inject lateinit var logBox: Box<Log>
+}
 
-        fun lifecycle(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.L, toPrintInLogcat)
-        fun i(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.I, toPrintInLogcat)
-        fun d(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.D, toPrintInLogcat)
-        fun w(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.W, toPrintInLogcat)
-
-        fun e(label: String, error: Throwable, toPrintInLogcat: Boolean = true) {
-            val errorMessage = error.stackTrace.joinToString(
-                separator = "\n\t",
-                prefix = "label: $label\n${error.message}\n\t"
-            )
-            printLogAndWriteToFile(errorMessage, Priority.E, toPrintInLogcat)
-            if (toPrintInLogcat) {
-                error.printStackTrace()
-            }
-        }
-
-        private fun printLogAndWriteToFile(logMessage: String, priority: Priority, toPrintInLogcat: Boolean) {
-            if (logMessage.isBlank()) return
-            Single.fromCallable { splitLogTitleAndLogBody(logMessage) }
-                .doOnSuccess {
-                    logStorage.put(
-                        Log(
-                            timestamp = currentTimeMillis(),
-                            title = it.first,
-                            priority = priority.ordinal,
-                            body = it.second,
-                            thread = Thread.currentThread().name
-                        )
-                    )
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
-
-            if (toPrintInLogcat && BuildConfig.DEBUG) {
-                android.util.Log.i(this::class.java.simpleName, logMessage)
-            }
-        }
-
-        /**
-         * @param logMessage must not be blank.
-         *
-         * @return Log's title and log's body.
-         * If log message is lesser than 200 symbols, then title will be null. In that case body includes all the message from original logMessage.
-         * In case logMessage has 200 symbols or more, first 100 symbols plus three dots (...) returned as LogTitle and the rest as LogBody
-         * */
-        @VisibleForTesting
-        fun splitLogTitleAndLogBody(logMessage: String): Pair<LogTitle?, LogBody> =
-            if (logMessage.isBlank()) {
-                throw IllegalArgumentException()
-            } else {
-                logMessage.takeIf {
-                    it.length < (MESSAGE_LENGTH_THRESHOLD * 2)
-                }?.let {
-                    null to it
-                } ?: logMessage.split("\n")
-                    .takeIf { it.size > 1 }
-                    ?.let {
-                        it[0] to it
-                            .drop(1)
-                            .joinToString("\n\t")
-                    } ?: logMessage.take(MESSAGE_LENGTH_THRESHOLD).plus("...") to logMessage.drop(MESSAGE_LENGTH_THRESHOLD)
-            }
+object FlightRecorder : LogBoxInjector() {
+    init {
+        Loggy.loggyComponent.inject(this)
     }
+
+    /** Must not be called before Loggy.init*/
+    fun lifecycle(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.L, toPrintInLogcat)
+    /** Must not be called before Loggy.init*/
+    fun i(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.I, toPrintInLogcat)
+    /** Must not be called before Loggy.init*/
+    fun d(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.D, toPrintInLogcat)
+    /** Must not be called before Loggy.init*/
+    fun w(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.W, toPrintInLogcat)
+
+    /** Must not be called before Loggy.init*/
+    fun e(label: String, error: Throwable, toPrintInLogcat: Boolean = true) {
+        val errorMessage = error.stackTrace.joinToString(
+            separator = "\n\t",
+            prefix = "label: $label\n${error.message}\n\t"
+        )
+        printLogAndWriteToFile(errorMessage, Priority.E, toPrintInLogcat)
+        if (toPrintInLogcat) {
+            error.printStackTrace()
+        }
+    }
+
+    private fun printLogAndWriteToFile(logMessage: String, priority: Priority, toPrintInLogcat: Boolean) {
+        if (logMessage.isBlank()) return
+        Single.fromCallable { splitLogTitleAndLogBody(logMessage) }
+            .doOnSuccess {
+                logBox.put(
+                    Log(
+                        timestamp = currentTimeMillis(),
+                        title = it.first,
+                        priority = priority.ordinal,
+                        body = it.second,
+                        thread = Thread.currentThread().name
+                    )
+                )
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe()
+
+        if (toPrintInLogcat && BuildConfig.DEBUG) {
+            android.util.Log.i(this::class.java.simpleName, logMessage)
+        }
+    }
+
+    /**
+     * @param logMessage must not be blank.
+     *
+     * @return Log's title and log's body.
+     * If log message is lesser than 200 symbols, then title will be null. In that case body includes all the message from original logMessage.
+     * In case logMessage has 200 symbols or more, first 100 symbols plus three dots (...) returned as LogTitle and the rest as LogBody
+     * */
+    @VisibleForTesting
+    fun splitLogTitleAndLogBody(logMessage: String): Pair<LogTitle?, LogBody> =
+        if (logMessage.isBlank()) {
+            throw IllegalArgumentException()
+        } else {
+            logMessage.takeIf {
+                it.length < (MESSAGE_LENGTH_THRESHOLD * 2)
+            }?.let {
+                null to it
+            } ?: logMessage.split("\n")
+                .takeIf { it.size > 1 }
+                ?.let {
+                    it[0] to it
+                        .drop(1)
+                        .joinToString("\n\t")
+                } ?: logMessage.take(MESSAGE_LENGTH_THRESHOLD).plus("...") to logMessage.drop(MESSAGE_LENGTH_THRESHOLD)
+        }
 
     enum class Priority {
         I,

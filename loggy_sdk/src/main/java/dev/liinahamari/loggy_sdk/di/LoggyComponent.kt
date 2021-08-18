@@ -20,7 +20,7 @@ import android.app.Application
 import dagger.BindsInstance
 import dagger.Component
 import dev.liinahamari.loggy_sdk.base.BaseFragment
-import java.io.File
+import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -28,20 +28,20 @@ const val USER_ID_QUALIFIER = "q--user_id"
 const val EMAIL_QUALIFIER = "q--email"
 
 @Singleton
-@Component(modules = [LoggyModule::class, ViewModelBuilderModule::class])
+@Component(modules = [MainModule::class, ViewModelBuilderModule::class, DbModule::class])
 interface LoggyComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance fun application(app: Application): Builder
-        @BindsInstance fun logFile(logFile: File): Builder
         @BindsInstance fun email(@Named(EMAIL_QUALIFIER) email: String): Builder
         @BindsInstance fun userId(@Named(USER_ID_QUALIFIER) userId: String): Builder
 
         /** for testing purposes */
-        fun loggyModule(module: LoggyModule): Builder
+        fun loggyModule(module: MainModule): Builder
 
         fun build(): LoggyComponent
     }
 
     fun inject(fragment: BaseFragment)
+    fun inject(flightRecorder: FlightRecorder)
 }

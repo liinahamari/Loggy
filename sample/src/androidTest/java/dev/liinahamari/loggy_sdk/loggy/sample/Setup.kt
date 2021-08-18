@@ -26,7 +26,7 @@ import dagger.Provides
 import dev.liinahamari.loggy_sdk.Loggy
 import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
 import dev.liinahamari.loggy_sdk.di.DaggerLoggyComponent
-import dev.liinahamari.loggy_sdk.di.LoggyModule
+import dev.liinahamari.loggy_sdk.di.MainModule
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.loggy.R
@@ -73,7 +73,7 @@ object Setup {
 }
 
 @Module
-class MockLoggyModule(private val context: Context, private val result: GetRecordResult) : LoggyModule() {
+class MockLoggyModule(private val context: Context, private val result: GetRecordResult) : MainModule() {
     @Provides
     @Singleton
     override fun provideLoggerInteractor(@Named(APPLICATION_CONTEXT) appContext: Context, composers: BaseComposers, logFile: File): LoggerInteractor =

@@ -17,7 +17,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package dev.liinahamari.loggy_sdk.screens.logs
 
-import android.app.Activity.RESULT_OK
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
@@ -32,8 +31,6 @@ import com.jakewharton.rxbinding4.view.clicks
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseFragment
 import dev.liinahamari.loggy_sdk.helper.CustomToast.errorToast
-import dev.liinahamari.loggy_sdk.helper.CustomToast.infoToast
-import dev.liinahamari.loggy_sdk.helper.CustomToast.successToast
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
 import io.reactivex.rxjava3.kotlin.addTo
 import jp.wasabeef.recyclerview.animators.FadeInAnimator
@@ -41,7 +38,7 @@ import kotlinx.android.synthetic.main.fragment_logs.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 private const val FILE_SENDING_REQUEST_CODE = 1011010
-private const val TEXT_TYPE = "text/plain"
+private const val MIME_TYPE_ANY = "*/*"
 
 class LogsFragment : BaseFragment(R.layout.fragment_logs) {
     private val logsFilters = mutableListOf<Int>()
@@ -106,26 +103,18 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
                         getString(R.string.subject), userId, requireActivity().applicationInfo.name
                     )
                 )
-                putExtra(Intent.EXTRA_STREAM, it)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                type = TEXT_TYPE
+                putExtra(Intent.EXTRA_STREAM, it)
+                type = MIME_TYPE_ANY
             }.also {
-                @Suppress("DEPRECATION")
-                startActivityForResult(it, FILE_SENDING_REQUEST_CODE)
+                startActivity(it)
             }
         })
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        @Suppress("DEPRECATION") super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == FILE_SENDING_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                successToast(R.string.sending_logs_successful)
-            } else {
-                infoToast(R.string.error_sending_logs)
-            }
-//            viewModel.deleteZippedLogs()
-        }
+    override fun onStop() {
+        super.onStop()
+        viewModel.deleteZippedLogs() //todo: causes blocking await. move to service
     }
 
     override fun setupClicks() {
@@ -185,7 +174,6 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
                 }
             }?.addTo(subscriptions)
 
-/*
         sendLogsToDeveloperFab
             ?.clicks()
             ?.throttleFirst()
@@ -193,7 +181,6 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
                 fabMenu.isVisible = false
                 viewModel.createZippedLogsFile()
             }?.addTo(subscriptions)
-*/
 
         mainFab
             ?.clicks()

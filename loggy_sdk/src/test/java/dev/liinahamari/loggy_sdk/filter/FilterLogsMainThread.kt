@@ -12,13 +12,15 @@
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ *//*
+
 
 package dev.liinahamari.loggy_sdk.filter
 
 import android.content.Context
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.liinahamari.loggy_sdk.db.LogToLogUiMapper
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.helper.yellow
@@ -44,7 +46,7 @@ class FilterLogsMainThread {
     private val logsFile = File.createTempFile("logs", ".tmp")
     private val context: Context = InstrumentationRegistry.getInstrumentation().context
     private val composers = BaseComposers()
-    private val logsInteractor = LoggerInteractor(context, composers, logsFile)
+    private val logsInteractor = LoggerInteractor(LogToLogUiMapper(), composers)
 
     @Before
     fun setUp() {
@@ -71,7 +73,9 @@ class FilterLogsMainThread {
     @Test
     fun `log added from non-main thread is filtered well - FlightRecorder#Priority#E`() = writeLogsAndCheckNonMainThreadFilter(FlightRecorder.Priority.E)
 
-    /** Logs one message from main thread and one from new thread. Filtering should keep non-main thread log and get rid of other*/
+    */
+/** Logs one message from main thread and one from new thread. Filtering should keep non-main thread log and get rid of other*//*
+
     private fun writeLogsAndCheckNonMainThreadFilter(priority: FlightRecorder.Priority) {
         assert(logsFile.length() == 0L)
 
@@ -108,4 +112,4 @@ class FilterLogsMainThread {
             .assertValueAt(1, GetRecordResult.InProgress) // because getEntireRecord() also has "InProgress" emission
             .assertValueAt(2) { it is GetRecordResult.Success && it.logs.size == 1 && it.logs[0].thread == newThreadName }
     }
-}
+}*/

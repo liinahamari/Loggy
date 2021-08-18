@@ -16,6 +16,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package dev.liinahamari.loggy_sdk.screens.logs
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.paging.Pager
@@ -24,13 +26,23 @@ import androidx.paging.PagingData
 import androidx.paging.rxjava3.flowable
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseViewModel
+import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
+import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
+import javax.inject.Named
 
-class LogsViewModel @Inject constructor(private val loggerInteractor: LoggerInteractor, private val pagingSource: LogsPagingSource) : BaseViewModel() {
+class LogsViewModel @Inject constructor(
+    @SuppressLint("StaticFieldLeak") @Named(APPLICATION_CONTEXT) val applicationContext: Context,
+    private val baseComposers: BaseComposers,
+    private val loggerInteractor: LoggerInteractor,
+    private val pagingSource: LogsPagingSource,
+    private val createZippedLogFileUseCase: CreateZippedLogFileUseCase,
+    private val deleteZippedLogsFileUseCase: DeleteZippedLogsFileUseCase
+) : BaseViewModel() {
     private val _loadingEvent = SingleLiveEvent<Boolean>()
     val loadingEvent: LiveData<Boolean> get() = _loadingEvent
 
@@ -71,25 +83,27 @@ class LogsViewModel @Inject constructor(private val loggerInteractor: LoggerInte
         }
     }
 
-/*
     fun createZippedLogsFile() {
-        disposable += loggerInteractor.createZippedLogsFile().subscribe {
-            when (it) {
-                is CreateZipLogsFileResult.InProgress -> _loadingEvent.value = true
-                is CreateZipLogsFileResult.Success -> {
-                    _loadingEvent.value = false
-                    _logFilePathEvent.value = it.path
-                }
-                is CreateZipLogsFileResult.IOError -> {
-                    _loadingEvent.value = false
-                    _errorEvent.value = R.string.io_error
+        disposable += createZippedLogFileUseCase.execute(applicationContext)
+            .compose(baseComposers.applyObservableSchedulers())
+            .subscribe {
+                when (it) {
+                    is CreateZipLogsFileResult.InProgress -> _loadingEvent.value = true
+                    is CreateZipLogsFileResult.Success -> {
+                        _loadingEvent.value = false
+                        _logFilePathEvent.value = it.path
+                    }
+                    is CreateZipLogsFileResult.IOError -> {
+                        _loadingEvent.value = false
+                        _errorEvent.value = R.string.io_error
+                    }
                 }
             }
-        }
     }
 
     fun deleteZippedLogs() {
-        disposable += loggerInteractor.deleteZippedLogs().subscribe()
+        disposable += deleteZippedLogsFileUseCase.execute(applicationContext)
+            .compose(baseComposers.applyCompletableSchedulers())
+            .subscribe()
     }
-*/
 }

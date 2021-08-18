@@ -14,34 +14,35 @@ ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+
 package dev.liinahamari.loggy_sdk
 
+import android.app.Application
 import android.content.Context
 import android.os.Build
-import android.os.Looper.getMainLooper
 import androidx.test.platform.app.InstrumentationRegistry
-import dev.liinahamari.loggy_sdk.helper.BaseComposers
-import dev.liinahamari.loggy_sdk.helper.DEBUG_LOGS_DIR
+import dev.liinahamari.loggy_sdk.db.Log
+import dev.liinahamari.loggy_sdk.db.MyObjectBox
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
-import dev.liinahamari.loggy_sdk.helper.createFileIfNotExist
+import dev.liinahamari.loggy_sdk.helper.yellow
 import dev.liinahamari.loggy_sdk.rules.ImmediateSchedulersRule
 import dev.liinahamari.loggy_sdk.screens.logs.CreateZipLogsFileResult
-import dev.liinahamari.loggy_sdk.screens.logs.LoggerInteractor
-import dev.liinahamari.loggy_sdk.screens.logs.ZIPPED_LOGS_FILE_NAME
+import dev.liinahamari.loggy_sdk.screens.logs.CreateZippedLogFileUseCase
+import dev.liinahamari.loggy_sdk.screens.logs.SHARED_LOGS_DIR_NAME
+import dev.liinahamari.loggy_sdk.screens.logs.SHARED_LOGS_ZIP_FILE_NAME
+import io.objectbox.Box
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.io.*
 import java.util.zip.ZipInputStream
 
 @Suppress("SpellCheckingInspection")
-const val LOREM = """
-    Lorem ipsum dolor sit amet, persius efficiendi sea an, vim te nusquam luptatum dissentias. Fabulas omittam sed an, eirmod facilisis iudicabit ne vis. Ad quo praesent vituperata adversarium, ea mei quot ullamcorper. Usu quis facilisi et.
+const val LOREM = """Lorem ipsum dolor sit amet, persius efficiendi sea an, vim te nusquam luptatum dissentias. Fabulas omittam sed an, eirmod facilisis iudicabit ne vis. Ad quo praesent vituperata adversarium, ea mei quot ullamcorper. Usu quis facilisi et.
 Omnium mentitum quaestio et eos, feugait nominavi qui an, tamquam praesent id has. At ius eruditi efficiendi, an assum viris instructior pro. Facer inermis honestatis est eu, mazim eirmod copiosae in cum, ei admodum efficiendi quo. Ut omnesque deleniti nominati vel, salutandi scriptorem in usu. Cu causae consectetuer sit, eos ex utroque consulatu. Ut quo bonorum nostrum, mucius definiebas no mea.
 Et everti dissentiet cum, nec eu primis pericula. Maiestatis assueverit vis no. Id eos probatus senserit, has tale probo cu. Est mazim doming causae et, vix ex odio mediocrem.
 Ea nonumes mentitum ponderum vel, cum paulo scriptorem ea. Tollit tacimates consectetuer ne vis. His omittam nominati iracundia ei, movet complectitur mel ei. Vis no unum maluisset. Perfecto delicata iudicabit vix te, inermis copiosae rationibus mel an, nam te enim lorem.
@@ -50,39 +51,47 @@ Sed animal laboramus ex. Ei ius lorem iuvaret qualisque, pertinax vulputate ex i
 Nec ut dolores inciderint, usu et atqui nonumy definiebas, id autem illum eleifend mei. Mei an justo error numquam, ne tation aliquam consequat cum, pro in persius erroribus. Ei usu delenit definitionem, ea has saperet dissentiunt. No vix illud utamur laoreet. Pri at solum exerci vulputate, eos epicurei adversarium ne. Vim detraxit sadipscing ei, vel te solum graece.
 Mei id consulatu laboramus. Albucius disputationi nec no, graeci democritum te cum, mea cu omnes sapientem. Eam ea partem integre suscipiantur, atqui assentior id quo. An lucilius facilisis mei. Sea duis option eu, facilisis aliquando no per, nec vide aeterno atomorum at. Ius id alii regione, esse animal appareat ut eos. Sed et everti cetero suavitate, mei ei autem graeci moderatius, id labores quaestio vis.
 Cu nisl iudico dolorum vix, mei amet noster cu. Ius ex probatus accusata, quis tota placerat cu sed, qui tation omnesque corrumpit ex. Eos eu alii habemus pericula. Ad saperet copiosae qualisque nec.
-Ex omnium iuvaret patrioque vis. Ea pri aliquam nonumes comprehensam, cu nam mutat salutatus, ei qui oratio dissentiet. Ad qui summo eruditi. Wisi idque fierent est et, libris epicurei cum ex. Sumo equidem feugait ex vis, commune singulis no sit.
-"""
+Ex omnium iuvaret patrioque vis. Ea pri aliquam nonumes comprehensam, cu nam mutat salutatus, ei qui oratio dissentiet. Ad qui summo eruditi. Wisi idque fierent est et, libris epicurei cum ex. Sumo equidem feugait ex vis, commune singulis no sit."""
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
 class CreateZippedFileTest {
-    private val logsFile = File.createTempFile("logs", ".tmp")
     private val context: Context = InstrumentationRegistry.getInstrumentation().context
-    private val composers = BaseComposers()
-    private val logsInteractor = LoggerInteractor(context, composers, logsFile)
+    private val application = InstrumentationRegistry.getInstrumentation().context.applicationContext as Application
+    private lateinit var logBox: Box<Log>
 
     @get:Rule
     val immediateSchedulersRule = ImmediateSchedulersRule()
 
     @Before
-    fun `fill File with some noise`() {
-        logsFile.writeText(LOREM)
-        FlightRecorder.logFileIs(logsFile)
+    fun `setup DB`() {
+        Loggy.initForTest(application)
+        logBox = MyObjectBox.builder()
+            .androidContext(context)
+            .build()
+            .boxFor(Log::class.java)
     }
 
     @After
     fun `tear down`() {
-        logsFile.delete()
+        logBox.removeAll()
     }
 
     @Test
     fun `create zipped file test`() {
-        shadowOf(getMainLooper()).idle()
+        val createZippedLogFileUseCase = CreateZippedLogFileUseCase(logBox)
 
-        val zippedLogsFile = File(File(context.filesDir, DEBUG_LOGS_DIR), ZIPPED_LOGS_FILE_NAME)
+        val zippedLogsFile = File(File(context.filesDir, SHARED_LOGS_DIR_NAME), SHARED_LOGS_ZIP_FILE_NAME)
         assert(zippedLogsFile.exists().not())
 
-        logsInteractor.createZippedLogsFile()
+        val title = "some_title"
+        val body = LOREM
+        val time = System.currentTimeMillis()
+        val thread = "some_thread"
+        val priority = FlightRecorder.Priority.W
+        logBox.put(Log(timestamp = time, title = title, body = body, thread = thread, priority = priority.ordinal))
+
+        createZippedLogFileUseCase.execute(context)
             .test()
             .assertNoErrors()
             .assertComplete()
@@ -92,49 +101,18 @@ class CreateZippedFileTest {
 
         assert(zippedLogsFile.exists())
         assert(zippedLogsFile.length() > 0)
-        assert(zippedLogsFile.length() < logsFile.length())
 
-        println("Original file's size: ${logsFile.length()}")
-        println("Zipped file's size: ${zippedLogsFile.length()}")
+        unzip(zippedLogsFile)
+            .readLines()
+            .joinToString("\n")
+            .also {
+                println(it.yellow())
 
-        with(unzip(zippedLogsFile)) {
-            assert(exists())
-            assert(readLines().first { it.isNotBlank() }.trim() == LOREM.split("\n").first { it.isNotBlank() }.trim())
-        }
-    }
-
-    @Test
-    fun `check there is only one zipped logs file on multiple createZippedLogsFile invocations`() {
-        shadowOf(getMainLooper()).idle()
-
-        val originText = "some_text"
-        logsFile.writeText(originText)
-        logsInteractor.createZippedLogsFile()
-            .test()
-            .assertNoErrors()
-            .assertComplete()
-            .assertValueCount(2)
-            .assertValueAt(0, CreateZipLogsFileResult.InProgress)
-            .assertValueAt(1) { it is CreateZipLogsFileResult.Success }
-
-        val zippedLogsFile = File(File(context.filesDir, DEBUG_LOGS_DIR), ZIPPED_LOGS_FILE_NAME)
-        assert(zippedLogsFile.exists())
-        assert(unzip(zippedLogsFile).readText() == originText)
-
-        val newText = "new_text"
-        logsFile.writeText(newText)
-        logsInteractor.createZippedLogsFile()
-            .test()
-            .assertNoErrors()
-            .assertComplete()
-            .assertValueCount(2)
-            .assertValueAt(0, CreateZipLogsFileResult.InProgress)
-            .assertValueAt(1) { it is CreateZipLogsFileResult.Success }
-
-        assert(zippedLogsFile.exists())
-        assert(zippedLogsFile.length() > 0)
-        assert(unzip(zippedLogsFile).readText() == newText)
-        assert(File(context.filesDir, DEBUG_LOGS_DIR).listFiles()!!.size == 1)
+                assert(it.contains(title))
+                assert(it.contains(thread))
+                assert(it.trim().contains(body.trim()))
+                assert(it.contains(priority.toString()))
+            }
     }
 
     private fun unzip(zipFile: File): File {
