@@ -45,16 +45,34 @@ object FlightRecorder : LogBoxInjector() {
         Loggy.loggyComponent.inject(this)
     }
 
-    /** Must not be called before Loggy.init*/
+    /**
+     * Logs a lifecycle event and writes it to the database.
+     * Must not be called before {@link Loggy#init}
+     * */
     fun lifecycle(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.L, toPrintInLogcat)
-    /** Must not be called before Loggy.init*/
+
+    /**
+     * Logs an info message and writes it to the database.
+     * Must not be called before {@link Loggy#init}
+     * */
     fun i(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.I, toPrintInLogcat)
-    /** Must not be called before Loggy.init*/
+
+    /**
+     * Logs a debug message and writes it to the database.
+     * Must not be called before {@link Loggy#init}
+     * */
     fun d(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.D, toPrintInLogcat)
-    /** Must not be called before Loggy.init*/
+
+    /**
+     * Logs a warn message and writes it to the database.
+     * Must not be called before {@link Loggy#init}
+     * */
     fun w(toPrintInLogcat: Boolean = true, what: () -> String) = printLogAndWriteToFile(what.invoke(), Priority.W, toPrintInLogcat)
 
-    /** Must not be called before Loggy.init*/
+    /**
+     * Logs an error and writes it to the database.
+     * Must not be called before {@link Loggy#init}
+     * */
     fun e(label: String, error: Throwable, toPrintInLogcat: Boolean = true) {
         val errorMessage = error.stackTrace.joinToString(
             separator = "\n\t",
