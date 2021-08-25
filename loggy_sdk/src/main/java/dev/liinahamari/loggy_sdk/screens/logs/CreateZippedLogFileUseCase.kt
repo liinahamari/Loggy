@@ -22,6 +22,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.FileProvider
 import dev.liinahamari.loggy_sdk.BuildConfig
 import dev.liinahamari.loggy_sdk.db.Log
+import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
+import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.helper.createFileIfNotExist
 import dev.liinahamari.loggy_sdk.helper.toReadableDate
@@ -33,6 +35,7 @@ import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
+import javax.inject.Named
 
 /** Must be corresponding <provider>'s authority in AndroidManifest */
 @VisibleForTesting const val FILE_PROVIDER_META = ".fileprovider"
@@ -43,8 +46,8 @@ import javax.inject.Inject
 @VisibleForTesting const val SHARED_LOGS_ZIP_FILE_NAME = "logs.zip"
 @VisibleForTesting const val SHARED_LOGS_TEXT_FILE_NAME = "logs.txt"
 
-class CreateZippedLogFileUseCase @Inject constructor(private val logBox: Box<Log>) {
-    fun execute(applicationContext: Context): Observable<CreateZipLogsFileResult> = Observable.just(BuildConfig.LIBRARY_PACKAGE_NAME + FILE_PROVIDER_META)
+class CreateZippedLogFileUseCase @Inject constructor(private val logBox: Box<Log>, @Named(APPLICATION_CONTEXT) private val applicationContext: Context, private val baseComposers: BaseComposers) {
+    fun execute(): Observable<CreateZipLogsFileResult> = Observable.just(BuildConfig.LIBRARY_PACKAGE_NAME + FILE_PROVIDER_META)
         .map { authority ->
             val zippedLogs = applicationContext.createFileIfNotExist(SHARED_LOGS_ZIP_FILE_NAME, SHARED_LOGS_DIR_NAME)
             ZipOutputStream(BufferedOutputStream(FileOutputStream(zippedLogs))).use { output ->
@@ -65,6 +68,7 @@ class CreateZippedLogFileUseCase @Inject constructor(private val logBox: Box<Log
         .map<CreateZipLogsFileResult> { CreateZipLogsFileResult.Success(it) }
         .onErrorReturn { CreateZipLogsFileResult.IOError }
         .startWithItem(CreateZipLogsFileResult.InProgress)
+        .compose(baseComposers.applyObservableSchedulers())
 }
 
 sealed class CreateZipLogsFileResult {

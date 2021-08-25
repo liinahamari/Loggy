@@ -16,8 +16,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package dev.liinahamari.loggy_sdk.screens.logs
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.paging.Pager
@@ -26,7 +24,6 @@ import androidx.paging.PagingData
 import androidx.paging.rxjava3.flowable
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseViewModel
-import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
 import dev.liinahamari.loggy_sdk.screens.logs.log_list.LogsPagingSource
@@ -35,12 +32,11 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
-import javax.inject.Named
 
 class LogsViewModel @Inject constructor(
-    @SuppressLint("StaticFieldLeak") @Named(APPLICATION_CONTEXT) val applicationContext: Context,
     private val baseComposers: BaseComposers,
     private val recordInteractor: RecordInteractor,
+    private val filterLogsUseCase: FilterLogsUseCase,
     private val pagingSource: LogsPagingSource,
     private val createZippedLogFileUseCase: CreateZippedLogFileUseCase,
     private val deleteZippedLogsFileUseCase: DeleteZippedLogsFileUseCase,
@@ -59,19 +55,19 @@ class LogsViewModel @Inject constructor(
     val displayLogsEvent: LiveData<List<LogUi>> get() = _displayLogsEvent
 
     @ExperimentalCoroutinesApi
-    val logs: Flowable<PagingData<LogUi>> = Pager(
+    var logs: Flowable<PagingData<LogUi>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_CAPACITY.toInt(),
             enablePlaceholders = true,
             maxSize = (PAGE_CAPACITY * 5).toInt(),
-            prefetchDistance = 1,
+            prefetchDistance = (PAGE_CAPACITY / 2).toInt(),
             initialLoadSize = PAGE_CAPACITY.toInt()
         ),
         pagingSourceFactory = { pagingSource }
     ).flowable
 
     fun clearLogs() {
-        disposable += recordInteractor.clearEntireRecord().subscribe { it ->
+        disposable += recordInteractor.clearEntireRecord().subscribe {
             when (it) {
                 is ClearRecordResult.Success -> {
                     _emptyLogListEvent.call()
@@ -87,8 +83,7 @@ class LogsViewModel @Inject constructor(
     }
 
     fun createZippedLogsFile() {
-        disposable += createZippedLogFileUseCase.execute(applicationContext)
-            .compose(baseComposers.applyObservableSchedulers())
+        disposable += createZippedLogFileUseCase.execute()
             .subscribe {
                 when (it) {
                     is CreateZipLogsFileResult.InProgress -> _loadingEvent.value = true

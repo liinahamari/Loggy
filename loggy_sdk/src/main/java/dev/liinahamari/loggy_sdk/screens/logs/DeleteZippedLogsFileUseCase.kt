@@ -17,13 +17,15 @@
 package dev.liinahamari.loggy_sdk.screens.logs
 
 import android.content.Context
+import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import io.reactivex.rxjava3.core.Completable
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Named
 
-class DeleteZippedLogsFileUseCase @Inject constructor() {
-    fun execute(applicationContext: Context): Completable = Completable.fromCallable {
+class DeleteZippedLogsFileUseCase @Inject constructor(@Named(APPLICATION_CONTEXT) private val applicationContext: Context) {
+    fun execute(): Completable = Completable.fromCallable {
         File(
             File(applicationContext.filesDir, SHARED_LOGS_ZIP_FILE_NAME),
             SHARED_LOGS_DIR_NAME
