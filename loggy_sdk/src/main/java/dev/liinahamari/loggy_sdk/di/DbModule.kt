@@ -36,5 +36,5 @@ open class DbModule {
 
     @Provides
     @Singleton
-    fun provideLogBox(boxStore: BoxStore): Box<Log> = boxStore.boxFor(Log::class.java)
+    open fun provideLogBox(boxStore: BoxStore): Box<Log> = boxStore.boxFor(Log::class.java)
 }

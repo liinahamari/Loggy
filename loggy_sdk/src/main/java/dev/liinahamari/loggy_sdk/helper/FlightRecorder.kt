@@ -30,9 +30,6 @@ import javax.inject.Inject
 typealias LogTitle = String
 typealias LogBody = String
 
-const val SEPARATOR = "/"
-const val DEBUG_LOGS_DIR = "SharedLogs"
-
 const val MESSAGE_LENGTH_THRESHOLD = 100
 
 /** Workaround for injection into Kotlin's object*/
@@ -138,5 +135,9 @@ object FlightRecorder : LogBoxInjector() {
         W,
         E,
         L
+    }
+
+    enum class FilterMode {
+        ALL, SHOW_ERRORS, SHOW_NON_MAIN_THREAD, HIDE_LIFECYCLE
     }
 }

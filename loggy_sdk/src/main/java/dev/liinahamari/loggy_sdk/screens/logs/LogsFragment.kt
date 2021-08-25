@@ -31,7 +31,9 @@ import com.jakewharton.rxbinding4.view.clicks
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseFragment
 import dev.liinahamari.loggy_sdk.helper.CustomToast.errorToast
+import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
+import dev.liinahamari.loggy_sdk.screens.logs.log_list.LogsAdapter
 import io.reactivex.rxjava3.kotlin.addTo
 import jp.wasabeef.recyclerview.animators.FadeInAnimator
 import kotlinx.android.synthetic.main.fragment_logs.*
@@ -139,10 +141,10 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
                     )
 
                     positiveButton(android.R.string.ok) {
-                        mutableListOf<FilterMode>().apply {
+                        mutableListOf<FlightRecorder.FilterMode>().apply {
                             0.also {
                                 if (isItemChecked(it)) {
-                                    add(FilterMode.SHOW_ERRORS)
+                                    add(FlightRecorder.FilterMode.SHOW_ERRORS)
                                     logsFilters.add(it)
                                 } else {
                                     logsFilters.remove(it)
@@ -151,7 +153,7 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
 
                             1.also {
                                 if (isItemChecked(it)) {
-                                    add(FilterMode.HIDE_LIFECYCLE)
+                                    add(FlightRecorder.FilterMode.HIDE_LIFECYCLE)
                                     logsFilters.add(it)
                                 } else {
                                     logsFilters.remove(it)
@@ -160,7 +162,7 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
 
                             2.also {
                                 if (isItemChecked(it)) {
-                                    add(FilterMode.SHOW_NON_MAIN_THREAD)
+                                    add(FlightRecorder.FilterMode.SHOW_NON_MAIN_THREAD)
                                     logsFilters.add(it)
                                 } else {
                                     logsFilters.add(it)

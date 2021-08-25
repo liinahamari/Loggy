@@ -14,15 +14,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.liinahamari.loggy_sdk.screens.logs
+package dev.liinahamari.loggy_sdk.screens.logs.log_list
 
 import androidx.paging.PagingState
 import androidx.paging.rxjava3.RxPagingSource
+import dev.liinahamari.loggy_sdk.screens.logs.GetRecordResult
+import dev.liinahamari.loggy_sdk.screens.logs.LogUi
+import dev.liinahamari.loggy_sdk.screens.logs.RecordInteractor
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
-class LogsPagingSource @Inject constructor(private val loggerInteractor: LoggerInteractor) : RxPagingSource<Int, LogUi>() {
-    override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, LogUi>> = loggerInteractor.getEntireRecord(params.key ?: 0)
+const val PAGE_CAPACITY = 20L
+
+class LogsPagingSource @Inject constructor(private val recordInteractor: RecordInteractor) : RxPagingSource<Int, LogUi>() {
+    override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, LogUi>> = recordInteractor.getEntireRecord(params.key ?: 0)
         .doOnError { it.printStackTrace() }
         .map {
             if (it is GetRecordResult.Success) {

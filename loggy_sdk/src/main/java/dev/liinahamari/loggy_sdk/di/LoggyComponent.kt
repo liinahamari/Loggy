@@ -37,7 +37,7 @@ interface LoggyComponent {
         @BindsInstance fun userId(@Named(USER_ID_QUALIFIER) userId: String): Builder
 
         /** for testing purposes */
-        fun loggyModule(module: MainModule): Builder
+        fun dbModule(module: DbModule): Builder
 
         fun build(): LoggyComponent
     }

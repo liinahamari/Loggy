@@ -29,6 +29,8 @@ import dev.liinahamari.loggy_sdk.base.BaseViewModel
 import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
+import dev.liinahamari.loggy_sdk.screens.logs.log_list.LogsPagingSource
+import dev.liinahamari.loggy_sdk.screens.logs.log_list.PAGE_CAPACITY
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +40,7 @@ import javax.inject.Named
 class LogsViewModel @Inject constructor(
     @SuppressLint("StaticFieldLeak") @Named(APPLICATION_CONTEXT) val applicationContext: Context,
     private val baseComposers: BaseComposers,
-    private val loggerInteractor: LoggerInteractor,
+    private val recordInteractor: RecordInteractor,
     private val pagingSource: LogsPagingSource,
     private val createZippedLogFileUseCase: CreateZippedLogFileUseCase,
     private val deleteZippedLogsFileUseCase: DeleteZippedLogsFileUseCase
@@ -68,7 +70,7 @@ class LogsViewModel @Inject constructor(
     ).flowable
 
     fun clearLogs() {
-        disposable += loggerInteractor.clearEntireRecord().subscribe { it ->
+        disposable += recordInteractor.clearEntireRecord().subscribe { it ->
             when (it) {
                 is ClearRecordResult.Success -> {
                     _emptyLogListEvent.call()

@@ -20,14 +20,13 @@ import dev.liinahamari.loggy_sdk.db.Log
 import dev.liinahamari.loggy_sdk.db.LogToLogUiMapper
 import dev.liinahamari.loggy_sdk.db.Log_
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
+import dev.liinahamari.loggy_sdk.screens.logs.log_list.PAGE_CAPACITY
 import io.objectbox.Box
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
-const val PAGE_CAPACITY = 20L
-
-class LoggerInteractor @Inject constructor(private val logMapper: LogToLogUiMapper, private val baseComposers: BaseComposers, private val logBox: Box<Log>) {
+class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapper, private val baseComposers: BaseComposers, private val logBox: Box<Log>) {
     fun getEntireRecord(page: Int): Single<GetRecordResult> = Single.fromCallable {
         logBox.query()
             .order(Log_.timestamp)
