@@ -43,7 +43,8 @@ class LogsViewModel @Inject constructor(
     private val recordInteractor: RecordInteractor,
     private val pagingSource: LogsPagingSource,
     private val createZippedLogFileUseCase: CreateZippedLogFileUseCase,
-    private val deleteZippedLogsFileUseCase: DeleteZippedLogsFileUseCase
+    private val deleteZippedLogsFileUseCase: DeleteZippedLogsFileUseCase,
+    val sharingCredentialsDatasetRepository: SharingCredentialsDatasetRepository
 ) : BaseViewModel() {
     private val _loadingEvent = SingleLiveEvent<Boolean>()
     val loadingEvent: LiveData<Boolean> get() = _loadingEvent

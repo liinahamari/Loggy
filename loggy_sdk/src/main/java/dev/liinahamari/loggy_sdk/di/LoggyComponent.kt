@@ -25,7 +25,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 const val USER_ID_QUALIFIER = "q--user_id"
-const val EMAIL_QUALIFIER = "q--email"
+const val INTEGRATORS_EMAIL_QUALIFIER = "q--email"
 
 @Singleton
 @Component(modules = [MainModule::class, ViewModelBuilderModule::class, DbModule::class])
@@ -33,11 +33,8 @@ interface LoggyComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance fun application(app: Application): Builder
-        @BindsInstance fun email(@Named(EMAIL_QUALIFIER) email: String): Builder
+        @BindsInstance fun email(@Named(INTEGRATORS_EMAIL_QUALIFIER) email: String): Builder
         @BindsInstance fun userId(@Named(USER_ID_QUALIFIER) userId: String): Builder
-
-        /** for testing purposes */
-        fun dbModule(module: DbModule): Builder
 
         fun build(): LoggyComponent
     }

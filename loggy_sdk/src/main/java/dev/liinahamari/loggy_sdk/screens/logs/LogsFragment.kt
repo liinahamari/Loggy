@@ -99,10 +99,12 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
 
         viewModel.logFilePathEvent.observe(this, {
             Intent(Intent.ACTION_SEND).apply {
-                putExtra(Intent.EXTRA_EMAIL, arrayOf(integratorsEmail))
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(viewModel.sharingCredentialsDatasetRepository.integratorsEmail))
                 putExtra(
                     Intent.EXTRA_SUBJECT, String.format(
-                        getString(R.string.subject), userId, requireActivity().applicationInfo.name
+                        getString(R.string.subject),
+                        viewModel.sharingCredentialsDatasetRepository.userId,
+                        requireActivity().applicationInfo.name
                     )
                 )
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
