@@ -31,9 +31,9 @@ import com.jakewharton.rxbinding4.view.clicks
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseFragment
 import dev.liinahamari.loggy_sdk.helper.CustomToast.errorToast
-import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.helper.throttleFirst
 import dev.liinahamari.loggy_sdk.screens.logs.log_list.LogsAdapter
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import jp.wasabeef.recyclerview.animators.FadeInAnimator
 import kotlinx.android.synthetic.main.fragment_logs.*
@@ -43,8 +43,9 @@ private const val FILE_SENDING_REQUEST_CODE = 1011010
 private const val MIME_TYPE_ANY = "*/*"
 
 class LogsFragment : BaseFragment(R.layout.fragment_logs) {
-    private val logsFilters = mutableListOf<Int>()
+    private val logFilters = mutableListOf<Int>()
     private var isFabMenuOpened = false
+    private val logListSubscription = CompositeDisposable()
 
     companion object {
         fun newInstance() = LogsFragment()
@@ -121,6 +122,7 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
         viewModel.deleteZippedLogs() //todo: causes blocking await. move to service
     }
 
+    @ExperimentalCoroutinesApi
     override fun setupClicks() {
         clearLogsFab
             ?.clicks()
@@ -136,46 +138,26 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
             ?.subscribe {
                 fabMenu.isVisible = false
 
-                MaterialDialog(requireContext()).show {
-                    listItemsMultiChoice(
-                        res = R.array.filter_mode,
-                        initialSelection = logsFilters.toIntArray()
-                    )
-
-                    positiveButton(android.R.string.ok) {
-                        mutableListOf<FlightRecorder.FilterMode>().apply {
-                            0.also {
-                                if (isItemChecked(it)) {
-                                    add(FlightRecorder.FilterMode.SHOW_ERRORS)
-                                    logsFilters.add(it)
+                MaterialDialog(requireContext())
+                    .listItemsMultiChoice(res = R.array.filter_mode, allowEmptySelection = true, initialSelection = logFilters.toIntArray())
+                    .show {
+                        positiveButton(android.R.string.ok) {
+                            FilterState.values().forEachIndexed { index, _ ->
+                                if (isItemChecked(index)) {
+                                    logFilters.add(index)
                                 } else {
-                                    logsFilters.remove(it)
+                                    logFilters.remove(index)
                                 }
                             }
 
-                            1.also {
-                                if (isItemChecked(it)) {
-                                    add(FlightRecorder.FilterMode.HIDE_LIFECYCLE)
-                                    logsFilters.add(it)
-                                } else {
-                                    logsFilters.remove(it)
-                                }
-                            }
-
-                            2.also {
-                                if (isItemChecked(it)) {
-                                    add(FlightRecorder.FilterMode.SHOW_NON_MAIN_THREAD)
-                                    logsFilters.add(it)
-                                } else {
-                                    logsFilters.add(it)
-                                }
-                            }
-                        }.also {
-//                            viewModel.sortLogs(it)
+                            logListSubscription.clear()
+                            viewModel.applyFilters(logFilters.map { FilterState.values()[it] })
+                            viewModel.logs.subscribe {
+                                logsAdapter.submitData(lifecycle, it)
+                            }?.addTo(logListSubscription)
                         }
+                        negativeButton(android.R.string.cancel) {}
                     }
-                    negativeButton(android.R.string.cancel) {}
-                }
             }?.addTo(subscriptions)
 
         sendLogsToDeveloperFab
@@ -197,6 +179,11 @@ class LogsFragment : BaseFragment(R.layout.fragment_logs) {
                     closeFabMenu()
                 }
             }?.addTo(subscriptions)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        logListSubscription.clear()
     }
 
     private fun showFabMenu() {

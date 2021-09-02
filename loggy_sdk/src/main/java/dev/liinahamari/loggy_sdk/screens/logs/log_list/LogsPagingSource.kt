@@ -18,25 +18,30 @@ package dev.liinahamari.loggy_sdk.screens.logs.log_list
 
 import androidx.paging.PagingState
 import androidx.paging.rxjava3.RxPagingSource
+import dev.liinahamari.loggy_sdk.screens.logs.FilterState
 import dev.liinahamari.loggy_sdk.screens.logs.GetRecordResult
 import dev.liinahamari.loggy_sdk.screens.logs.LogUi
 import dev.liinahamari.loggy_sdk.screens.logs.RecordInteractor
 import io.reactivex.rxjava3.core.Single
-import javax.inject.Inject
 
 const val PAGE_CAPACITY = 20L
 
-class LogsPagingSource @Inject constructor(private val recordInteractor: RecordInteractor) : RxPagingSource<Int, LogUi>() {
-    override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, LogUi>> = recordInteractor.getEntireRecord(params.key ?: 0)
-        .doOnError { it.printStackTrace() }
-        .map {
-            if (it is GetRecordResult.Success) {
-                toLoadResult(it.logs, params.key ?: 0)
-            } else {
-                LoadResult.Error(IllegalStateException())
+class LogsPagingSource(private val recordInteractor: RecordInteractor, private val filterStates: List<FilterState>) : RxPagingSource<Int, LogUi>() {
+    override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, LogUi>> =
+        (if (filterStates.isEmpty()) {
+            recordInteractor.getEntireRecord(params.key ?: 0)
+        } else {
+            recordInteractor.getFilteredRecord(params.key ?: 0, filterStates)
+        })
+            .doOnError { it.printStackTrace() }
+            .map {
+                when (it) {
+                    is GetRecordResult.Success -> toLoadResult(it.logs, params.key ?: 0)
+                    is GetRecordResult.EmptyList -> toLoadResult(emptyList(), params.key ?: 0)
+                    else -> LoadResult.Error(IllegalStateException())
+                }
             }
-        }
-        .onErrorReturn { LoadResult.Error(it) }
+            .onErrorReturn { LoadResult.Error(it) }
 
     private fun toLoadResult(data: List<LogUi>, lastIndex: Int): LoadResult<Int, LogUi> = LoadResult.Page(
         data = data,

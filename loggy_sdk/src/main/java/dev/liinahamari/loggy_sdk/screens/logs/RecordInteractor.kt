@@ -20,6 +20,7 @@ import dev.liinahamari.loggy_sdk.db.Log
 import dev.liinahamari.loggy_sdk.db.LogToLogUiMapper
 import dev.liinahamari.loggy_sdk.db.Log_
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
+import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.screens.logs.log_list.PAGE_CAPACITY
 import io.objectbox.Box
 import io.reactivex.rxjava3.core.Observable
@@ -38,7 +39,27 @@ class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapp
         .onErrorReturn { GetRecordResult.Error.IOError }
         .compose(baseComposers.applySingleSchedulers())
 
-    fun clearEntireRecord(): Observable<ClearRecordResult> = Observable.fromAction<Any> {
+    fun getFilteredRecord(page: Int, filterStates: List<FilterState>): Single<GetRecordResult> = Single.fromCallable {
+        logBox.query()
+            .apply {
+                if (filterStates.any { it == FilterState.NON_MAIN_THREAD }) notEqual(Log_.thread, "main")
+                if (filterStates.any { it == FilterState.NOT_LIFECYCLE_EVENT }) notEqual(Log_.priority, FlightRecorder.Priority.L.ordinal.toLong())
+                if (filterStates.any { it == FilterState.SHOW_ONLY_ERRORS }) equal(Log_.priority, FlightRecorder.Priority.E.ordinal.toLong())
+            }
+            .order(Log_.timestamp)
+            .build()
+            .find(if (page == 1) 0 else page * PAGE_CAPACITY, PAGE_CAPACITY)
+
+    }
+        .map { it.map(logMapper::transform) }
+        .map { if (it.isNotEmpty()) GetRecordResult.Success(it) else GetRecordResult.EmptyList }
+        .onErrorReturn {
+            it.printStackTrace()
+            GetRecordResult.Error.IOError
+        }
+        .compose(baseComposers.applySingleSchedulers())
+
+    fun clearEntireRecord(): Observable<ClearRecordResult> = Observable.fromAction<Unit> {
         logBox.removeAll()
     }
         .map<ClearRecordResult> { ClearRecordResult.Success }

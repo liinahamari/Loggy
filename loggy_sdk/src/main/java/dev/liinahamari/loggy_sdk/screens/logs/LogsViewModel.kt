@@ -24,23 +24,24 @@ import androidx.paging.PagingData
 import androidx.paging.rxjava3.flowable
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseViewModel
+import dev.liinahamari.loggy_sdk.db.Log
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
 import dev.liinahamari.loggy_sdk.screens.logs.log_list.LogsPagingSource
 import dev.liinahamari.loggy_sdk.screens.logs.log_list.PAGE_CAPACITY
+import io.objectbox.Box
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
 class LogsViewModel @Inject constructor(
+    private val logBox: Box<Log>,
     private val baseComposers: BaseComposers,
     private val recordInteractor: RecordInteractor,
-    private val filterLogsUseCase: FilterLogsUseCase,
-    private val pagingSource: LogsPagingSource,
     private val createZippedLogFileUseCase: CreateZippedLogFileUseCase,
     private val deleteZippedLogsFileUseCase: DeleteZippedLogsFileUseCase,
-    val sharingCredentialsDatasetRepository: SharingCredentialsDatasetRepository
+    val sharingCredentialsDatasetRepository: SharingCredentialsDatasetRepository,
 ) : BaseViewModel() {
     private val _loadingEvent = SingleLiveEvent<Boolean>()
     val loadingEvent: LiveData<Boolean> get() = _loadingEvent
@@ -63,7 +64,7 @@ class LogsViewModel @Inject constructor(
             prefetchDistance = (PAGE_CAPACITY / 2).toInt(),
             initialLoadSize = PAGE_CAPACITY.toInt()
         ),
-        pagingSourceFactory = { pagingSource }
+        pagingSourceFactory = { LogsPagingSource(recordInteractor, emptyList()) }
     ).flowable
 
     fun clearLogs() {
@@ -99,8 +100,22 @@ class LogsViewModel @Inject constructor(
             }
     }
 
+    @ExperimentalCoroutinesApi
+    fun applyFilters(filterStates: List<FilterState>) {
+        logs = Pager(
+            config = PagingConfig(
+                pageSize = PAGE_CAPACITY.toInt(),
+                enablePlaceholders = true,
+                maxSize = (PAGE_CAPACITY * 5).toInt(),
+                prefetchDistance = (PAGE_CAPACITY / 2).toInt(),
+                initialLoadSize = PAGE_CAPACITY.toInt()
+            ),
+            pagingSourceFactory = { LogsPagingSource(recordInteractor, filterStates) }
+        ).flowable
+    }
+
     fun deleteZippedLogs() {
-        disposable += deleteZippedLogsFileUseCase.execute(applicationContext)
+        disposable += deleteZippedLogsFileUseCase.execute()
             .compose(baseComposers.applyCompletableSchedulers())
             .subscribe()
     }

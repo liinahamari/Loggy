@@ -30,7 +30,7 @@ import javax.inject.Inject
 typealias LogTitle = String
 typealias LogBody = String
 
-const val MESSAGE_LENGTH_THRESHOLD = 100
+const val MESSAGE_LENGTH_THRESHOLD = 50
 
 /** Workaround for injection into Kotlin's object*/
 open class LogBoxInjector {
