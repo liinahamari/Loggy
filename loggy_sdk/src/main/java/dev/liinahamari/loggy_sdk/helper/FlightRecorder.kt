@@ -34,7 +34,8 @@ const val MESSAGE_LENGTH_THRESHOLD = 100
 
 /** Workaround for injection into Kotlin's object*/
 open class LogBoxInjector {
-    @Inject lateinit var logBox: Box<Log>
+    @Inject
+    lateinit var logBox: Box<Log>
 }
 
 object FlightRecorder : LogBoxInjector() {
@@ -83,6 +84,7 @@ object FlightRecorder : LogBoxInjector() {
 
     private fun printLogAndWriteToFile(logMessage: String, priority: Priority, toPrintInLogcat: Boolean) {
         if (logMessage.isBlank()) return
+        val thread = Thread.currentThread().name
         Single.fromCallable { splitLogTitleAndLogBody(logMessage) }
             .doOnSuccess {
                 logBox.put(
@@ -91,7 +93,7 @@ object FlightRecorder : LogBoxInjector() {
                         title = it.first,
                         priority = priority.ordinal,
                         body = it.second,
-                        thread = Thread.currentThread().name
+                        thread = thread
                     )
                 )
             }
@@ -135,9 +137,5 @@ object FlightRecorder : LogBoxInjector() {
         W,
         E,
         L
-    }
-
-    enum class FilterMode {
-        ALL, SHOW_ERRORS, SHOW_NON_MAIN_THREAD, HIDE_LIFECYCLE
     }
 }
