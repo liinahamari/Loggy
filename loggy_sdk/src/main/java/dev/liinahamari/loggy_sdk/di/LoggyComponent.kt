@@ -28,7 +28,7 @@ const val USER_ID_QUALIFIER = "q--user_id"
 const val INTEGRATORS_EMAIL_QUALIFIER = "q--email"
 
 @Singleton
-@Component(modules = [MainModule::class, ViewModelBuilderModule::class, DbModule::class])
+@Component(modules = [ViewModelBuilderModule::class, DbModule::class])
 interface LoggyComponent {
     @Component.Builder
     interface Builder {

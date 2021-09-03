@@ -18,10 +18,8 @@ package dev.liinahamari.loggy_sdk
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
-import dev.liinahamari.loggy_sdk.db.MyObjectBox
 import dev.liinahamari.loggy_sdk.di.DaggerLoggyComponent
 import dev.liinahamari.loggy_sdk.di.LoggyComponent
-import io.objectbox.BoxStore
 
 object Loggy {
     lateinit var loggyComponent: LoggyComponent

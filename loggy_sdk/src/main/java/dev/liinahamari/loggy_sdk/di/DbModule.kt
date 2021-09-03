@@ -16,6 +16,7 @@
 
 package dev.liinahamari.loggy_sdk.di
 
+import android.app.Application
 import android.content.Context
 import dagger.Module
 import dagger.Provides
@@ -30,7 +31,7 @@ import javax.inject.Singleton
 open class DbModule {
     @Provides
     @Singleton
-    fun provideBoxStore(@Named(APPLICATION_CONTEXT) context: Context): BoxStore = MyObjectBox.builder()
+    fun provideBoxStore(context: Application): BoxStore = MyObjectBox.builder()
         .androidContext(context)
         .build()
 

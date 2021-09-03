@@ -16,13 +16,12 @@
 
 package dev.liinahamari.loggy_sdk.screens.logs
 
-import android.content.Context
+import android.app.Application
 import android.net.Uri
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.FileProvider
 import dev.liinahamari.loggy_sdk.BuildConfig
 import dev.liinahamari.loggy_sdk.db.Log
-import dev.liinahamari.loggy_sdk.di.APPLICATION_CONTEXT
 import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.helper.createFileIfNotExist
@@ -35,7 +34,6 @@ import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
-import javax.inject.Named
 
 /** Must be corresponding <provider>'s authority in AndroidManifest */
 @VisibleForTesting const val FILE_PROVIDER_META = ".fileprovider"
@@ -46,7 +44,7 @@ import javax.inject.Named
 @VisibleForTesting const val SHARED_LOGS_ZIP_FILE_NAME = "logs.zip"
 @VisibleForTesting const val SHARED_LOGS_TEXT_FILE_NAME = "logs.txt"
 
-class CreateZippedLogFileUseCase @Inject constructor(private val logBox: Box<Log>, @Named(APPLICATION_CONTEXT) private val applicationContext: Context, private val baseComposers: BaseComposers) {
+class CreateZippedLogFileUseCase @Inject constructor(private val logBox: Box<Log>, private val applicationContext: Application, private val baseComposers: BaseComposers) {
     fun execute(): Observable<CreateZipLogsFileResult> = Observable.just(BuildConfig.LIBRARY_PACKAGE_NAME + FILE_PROVIDER_META)
         .map { authority ->
             val zippedLogs = applicationContext.createFileIfNotExist(SHARED_LOGS_ZIP_FILE_NAME, SHARED_LOGS_DIR_NAME)
