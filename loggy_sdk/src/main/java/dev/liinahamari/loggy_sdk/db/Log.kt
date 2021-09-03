@@ -16,15 +16,24 @@
 
 package dev.liinahamari.loggy_sdk.db
 
+import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 
 @Entity
 data class Log(
-    @Id var id: Long = 0L,
-    var timestamp: Long = 0L,
+    @Id var id: Long = 0L, //todo how it works?
+    var timestamp: Long,
     var title: String? = null,
-    var priority: Int = -1,
-    var body: String = "placeholder_body",
-    var thread: String = "placeholder_thread"
-)
+    var priority: Int,
+    var body: String,
+    var thread: String
+) {
+    companion object {
+        fun testILog(): Log = Log(timestamp = 1L, priority = FlightRecorder.Priority.I.ordinal, body = "", thread = "")
+        fun testLLog(): Log = Log(timestamp = 1L, priority = FlightRecorder.Priority.L.ordinal, body = "", thread = "")
+        fun testELog(): Log = Log(timestamp = 1L, priority = FlightRecorder.Priority.E.ordinal, body = "", thread = "")
+        fun testWLog(): Log = Log(timestamp = 1L, priority = FlightRecorder.Priority.W.ordinal, body = "", thread = "")
+        fun testDLog(): Log = Log(timestamp = 1L, priority = FlightRecorder.Priority.D.ordinal, body = "", thread = "")
+    }
+}
