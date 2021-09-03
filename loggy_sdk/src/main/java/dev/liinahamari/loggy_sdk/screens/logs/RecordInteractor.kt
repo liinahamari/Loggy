@@ -39,7 +39,7 @@ class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapp
         .onErrorReturn { GetRecordResult.Error.IOError }
         .compose(baseComposers.applySingleSchedulers())
 
-    fun getFilteredRecord(page: Int, filterStates: List<FilterState>): Single<GetRecordResult> = Single.fromCallable {
+    fun getFilteredRecord(page: Int = 0, filterStates: List<FilterState>): Single<GetRecordResult> = Single.fromCallable {
         logBox.query()
             .apply {
                 if (filterStates.any { it == FilterState.NON_MAIN_THREAD }) notEqual(Log_.thread, "main")
@@ -71,7 +71,6 @@ class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapp
 sealed class GetRecordResult {
     data class Success(val logs: List<LogUi>) : GetRecordResult()
     object EmptyList : GetRecordResult()
-    object InProgress : GetRecordResult()
     sealed class Error : GetRecordResult() {
         object IOError : Error()
     }
