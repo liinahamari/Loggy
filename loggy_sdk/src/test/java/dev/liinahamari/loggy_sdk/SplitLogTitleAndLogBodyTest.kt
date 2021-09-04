@@ -16,18 +16,25 @@
 
 package dev.liinahamari.loggy_sdk
 
+import android.app.Application
+import android.content.Context
 import android.os.Build
+import androidx.test.platform.app.InstrumentationRegistry
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.helper.MESSAGE_LENGTH_THRESHOLD
 import dev.liinahamari.loggy_sdk.helper.yellow
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
+@RunWith(RobolectricTestRunner::class)
 class SplitLogTitleAndLogBodyTest {
-    @Test(expected = IllegalArgumentException::class)
+    @Before
+    fun init() = Loggy.initForTest(InstrumentationRegistry.getInstrumentation().context.applicationContext as Application)
+
     fun `when empty message transmitted to splitLogTitleAndLogBody func then IllegalArgumentException thrown`() {
         FlightRecorder.splitLogTitleAndLogBody("")
     }

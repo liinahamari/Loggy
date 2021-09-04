@@ -23,6 +23,7 @@ import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.liinahamari.loggy_sdk.db.Log
 import dev.liinahamari.loggy_sdk.db.MyObjectBox
+import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
 import dev.liinahamari.loggy_sdk.helper.yellow
 import dev.liinahamari.loggy_sdk.rules.ImmediateSchedulersRule
@@ -42,7 +43,8 @@ import java.io.*
 import java.util.zip.ZipInputStream
 
 @Suppress("SpellCheckingInspection")
-const val LOREM = """Lorem ipsum dolor sit amet, persius efficiendi sea an, vim te nusquam luptatum dissentias. Fabulas omittam sed an, eirmod facilisis iudicabit ne vis. Ad quo praesent vituperata adversarium, ea mei quot ullamcorper. Usu quis facilisi et.
+const val LOREM =
+    """Lorem ipsum dolor sit amet, persius efficiendi sea an, vim te nusquam luptatum dissentias. Fabulas omittam sed an, eirmod facilisis iudicabit ne vis. Ad quo praesent vituperata adversarium, ea mei quot ullamcorper. Usu quis facilisi et.
 Omnium mentitum quaestio et eos, feugait nominavi qui an, tamquam praesent id has. At ius eruditi efficiendi, an assum viris instructior pro. Facer inermis honestatis est eu, mazim eirmod copiosae in cum, ei admodum efficiendi quo. Ut omnesque deleniti nominati vel, salutandi scriptorem in usu. Cu causae consectetuer sit, eos ex utroque consulatu. Ut quo bonorum nostrum, mucius definiebas no mea.
 Et everti dissentiet cum, nec eu primis pericula. Maiestatis assueverit vis no. Id eos probatus senserit, has tale probo cu. Est mazim doming causae et, vix ex odio mediocrem.
 Ea nonumes mentitum ponderum vel, cum paulo scriptorem ea. Tollit tacimates consectetuer ne vis. His omittam nominati iracundia ei, movet complectitur mel ei. Vis no unum maluisset. Perfecto delicata iudicabit vix te, inermis copiosae rationibus mel an, nam te enim lorem.
@@ -58,7 +60,10 @@ Ex omnium iuvaret patrioque vis. Ea pri aliquam nonumes comprehensam, cu nam mut
 class CreateZippedFileTest {
     private val context: Context = InstrumentationRegistry.getInstrumentation().context
     private val application = InstrumentationRegistry.getInstrumentation().context.applicationContext as Application
-    private lateinit var logBox: Box<Log>
+    private val boxStore = MyObjectBox.builder()
+        .androidContext(context)
+        .build()
+    private val logBox: Box<Log> = boxStore.boxFor(Log::class.java)
 
     @get:Rule
     val immediateSchedulersRule = ImmediateSchedulersRule()
@@ -66,10 +71,6 @@ class CreateZippedFileTest {
     @Before
     fun `setup DB`() {
         Loggy.initForTest(application)
-        logBox = MyObjectBox.builder()
-            .androidContext(context)
-            .build()
-            .boxFor(Log::class.java)
     }
 
     @After
@@ -79,7 +80,7 @@ class CreateZippedFileTest {
 
     @Test
     fun `create zipped file test`() {
-        val createZippedLogFileUseCase = CreateZippedLogFileUseCase(logBox)
+        val createZippedLogFileUseCase = CreateZippedLogFileUseCase(logBox, application, BaseComposers())
 
         val zippedLogsFile = File(File(context.filesDir, SHARED_LOGS_DIR_NAME), SHARED_LOGS_ZIP_FILE_NAME)
         assert(zippedLogsFile.exists().not())
@@ -91,7 +92,7 @@ class CreateZippedFileTest {
         val priority = FlightRecorder.Priority.W
         logBox.put(Log(timestamp = time, title = title, body = body, thread = thread, priority = priority.ordinal))
 
-        createZippedLogFileUseCase.execute(context)
+        createZippedLogFileUseCase.execute()
             .test()
             .assertNoErrors()
             .assertComplete()
