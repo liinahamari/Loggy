@@ -18,13 +18,31 @@ package dev.liinahamari.loggy_sdk.screens.logs
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.rxjava3.flowable
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.base.BaseViewModel
+import dev.liinahamari.loggy_sdk.db.Log
+import dev.liinahamari.loggy_sdk.helper.BaseComposers
 import dev.liinahamari.loggy_sdk.helper.SingleLiveEvent
+import dev.liinahamari.loggy_sdk.screens.logs.log_list.LogsPagingSource
+import dev.liinahamari.loggy_sdk.screens.logs.log_list.PAGE_CAPACITY
+import io.objectbox.Box
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.plusAssign
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
- class LogsViewModel @Inject constructor(private val loggerInteractor: LoggerInteractor) : BaseViewModel() {
+class LogsViewModel @Inject constructor(
+    private val logBox: Box<Log>,
+    private val baseComposers: BaseComposers,
+    private val recordInteractor: RecordInteractor,
+    private val createZippedLogFileUseCase: CreateZippedLogFileUseCase,
+    private val deleteZippedLogsFileUseCase: DeleteZippedLogsFileUseCase,
+    val sharingCredentialsDatasetRepository: SharingCredentialsDatasetRepository,
+) : BaseViewModel() {
     private val _loadingEvent = SingleLiveEvent<Boolean>()
     val loadingEvent: LiveData<Boolean> get() = _loadingEvent
 
@@ -37,55 +55,27 @@ import javax.inject.Inject
     private val _displayLogsEvent = SingleLiveEvent<List<LogUi>>()
     val displayLogsEvent: LiveData<List<LogUi>> get() = _displayLogsEvent
 
-    fun fetchLogs() {
-        disposable += loggerInteractor.getEntireRecord().subscribe {
-            when (it) {
-                is GetRecordResult.Success -> {
-                    _displayLogsEvent.value = it.logs
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.IOError -> {
-                    _errorEvent.value = R.string.io_error
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.EmptyList -> {
-                    _emptyLogListEvent.call()
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.InProgress -> _loadingEvent.value = true
-            }
-        }
-    }
-
-    fun sortLogs(filterModes: List<FilterMode>) {
-        disposable += loggerInteractor.sortLogs(filterModes).subscribe { sortedLogs ->
-            when (sortedLogs) {
-                is GetRecordResult.Success -> {
-                    _displayLogsEvent.value = sortedLogs.logs
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.IOError -> {
-                    _errorEvent.value = R.string.io_error
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.EmptyList -> {
-                    _emptyLogListEvent.call()
-                    _loadingEvent.value = false
-                }
-                is GetRecordResult.InProgress -> _loadingEvent.value = true
-            }
-        }
-    }
+    @ExperimentalCoroutinesApi
+    var logs: Flowable<PagingData<LogUi>> = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_CAPACITY.toInt(),
+            enablePlaceholders = true,
+            maxSize = (PAGE_CAPACITY * 5).toInt(),
+            prefetchDistance = (PAGE_CAPACITY / 2).toInt(),
+            initialLoadSize = PAGE_CAPACITY.toInt()
+        ),
+        pagingSourceFactory = { LogsPagingSource(recordInteractor, emptyList()) }
+    ).flowable
 
     fun clearLogs() {
-        disposable += loggerInteractor.clearEntireRecord().subscribe {
+        disposable += recordInteractor.clearEntireRecord().subscribe {
             when (it) {
                 is ClearRecordResult.Success -> {
                     _emptyLogListEvent.call()
                     _loadingEvent.value = false
                 }
-                is ClearRecordResult.IOError -> {
-                    _errorEvent.value = R.string.io_error
+                is ClearRecordResult.Error.IOError -> {
+                    _errorEvent.value = R.string.io_error //fixme error message
                     _loadingEvent.value = false
                 }
                 is ClearRecordResult.InProgress -> _loadingEvent.value = true
@@ -94,22 +84,39 @@ import javax.inject.Inject
     }
 
     fun createZippedLogsFile() {
-        disposable += loggerInteractor.createZippedLogsFile().subscribe {
-            when (it) {
-                is CreateZipLogsFileResult.InProgress -> _loadingEvent.value = true
-                is CreateZipLogsFileResult.Success -> {
-                    _loadingEvent.value = false
-                    _logFilePathEvent.value = it.path
-                }
-                is CreateZipLogsFileResult.IOError -> {
-                    _loadingEvent.value = false
-                    _errorEvent.value = R.string.io_error
+        disposable += createZippedLogFileUseCase.execute()
+            .subscribe {
+                when (it) {
+                    is CreateZipLogsFileResult.InProgress -> _loadingEvent.value = true
+                    is CreateZipLogsFileResult.Success -> {
+                        _loadingEvent.value = false
+                        _logFilePathEvent.value = it.path
+                    }
+                    is CreateZipLogsFileResult.IOError -> {
+                        _loadingEvent.value = false
+                        _errorEvent.value = R.string.io_error
+                    }
                 }
             }
-        }
+    }
+
+    @ExperimentalCoroutinesApi
+    fun applyFilters(filterStates: List<FilterState>) {
+        logs = Pager(
+            config = PagingConfig(
+                pageSize = PAGE_CAPACITY.toInt(),
+                enablePlaceholders = true,
+                maxSize = (PAGE_CAPACITY * 5).toInt(),
+                prefetchDistance = (PAGE_CAPACITY / 2).toInt(),
+                initialLoadSize = PAGE_CAPACITY.toInt()
+            ),
+            pagingSourceFactory = { LogsPagingSource(recordInteractor, filterStates) }
+        ).flowable
     }
 
     fun deleteZippedLogs() {
-        disposable += loggerInteractor.deleteZippedLogs().subscribe()
+        disposable += deleteZippedLogsFileUseCase.execute()
+            .compose(baseComposers.applyCompletableSchedulers())
+            .subscribe()
     }
 }

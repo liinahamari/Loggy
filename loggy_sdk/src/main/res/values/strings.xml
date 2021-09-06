@@ -18,4 +18,5 @@
     <string name="error_sending_logs">Logs haven\'t been successfully sent!</string>
     <string name="subject">Logs of %s (application: %s)</string>
     <string name="title_filter">Filter</string>
+    <string name="error_parsing_logs">There is (are) log(s) which can\'t be parsed.</string>
 </resources>

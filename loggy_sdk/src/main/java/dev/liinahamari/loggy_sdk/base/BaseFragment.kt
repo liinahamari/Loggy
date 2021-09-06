@@ -24,16 +24,10 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import dev.liinahamari.loggy_sdk.Loggy
-import dev.liinahamari.loggy_sdk.di.EMAIL_QUALIFIER
-import dev.liinahamari.loggy_sdk.di.USER_ID_QUALIFIER
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
-import javax.inject.Named
 
 open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout) {
-    @field:[Inject Named(USER_ID_QUALIFIER)] protected lateinit var userId: String
-    @field:[Inject Named(EMAIL_QUALIFIER)] protected lateinit var integratorsEmail: String
-
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     protected val subscriptions = CompositeDisposable()
 

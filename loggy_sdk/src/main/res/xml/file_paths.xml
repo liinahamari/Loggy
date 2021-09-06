@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <files-path name="TempLogs" path="TempLogs/"/>
+    <files-path name="SharedLogs" path="SharedLogs/"/>
 </paths>
