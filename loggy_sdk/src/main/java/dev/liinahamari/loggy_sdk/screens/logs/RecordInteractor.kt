@@ -32,7 +32,7 @@ class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapp
         logBox.query()
             .order(Log_.timestamp)
             .build()
-            .find(if (page == 1) 0 else page * PAGE_CAPACITY, PAGE_CAPACITY)
+            .find(if (page == 0) 0 else page * PAGE_CAPACITY, PAGE_CAPACITY)
     }
         .map { it.map(logMapper::transform) }
         .map { if (it.isNotEmpty()) GetRecordResult.Success(it) else GetRecordResult.EmptyList }
