@@ -18,12 +18,12 @@ package dev.liinahamari.loggy_sdk.loggy
 
 import android.view.View
 import androidx.fragment.app.commitNow
-import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import dev.liinahamari.loggy_sdk.Loggy
 import dev.liinahamari.loggy_sdk.R
 import dev.liinahamari.loggy_sdk.helper.FlightRecorder
+import dev.liinahamari.loggy_sdk.loggy.rules.ImmediateSchedulersRule
 import dev.liinahamari.loggy_sdk.screens.logs.LogsFragment
 import dev.liinahamari.loggy_sdk.screens.logs.log_list.PAGE_CAPACITY
 import io.github.kakaocup.kakao.common.views.KView
