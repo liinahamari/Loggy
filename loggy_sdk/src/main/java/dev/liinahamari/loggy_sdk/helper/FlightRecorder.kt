@@ -35,7 +35,7 @@ const val MESSAGE_LENGTH_THRESHOLD = 50
 /** Workaround for injection into Kotlin's object*/
 open class LogBoxInjector {
     @Inject
-    lateinit var logBox: Box<Log>
+    internal lateinit var logBox: Box<Log>
 }
 
 object FlightRecorder : LogBoxInjector() {

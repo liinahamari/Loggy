@@ -59,7 +59,7 @@ class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapp
         }
         .compose(baseComposers.applySingleSchedulers())
 
-    fun clearEntireRecord(): Observable<ClearRecordResult> = Observable.fromAction<Unit> {
+    fun clearEntireRecord(): Observable<ClearRecordResult> = Observable.fromCallable {
         logBox.removeAll()
     }
         .map<ClearRecordResult> { ClearRecordResult.Success }
