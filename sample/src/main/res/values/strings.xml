@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Loggy</string>
-    <string name="title_open_logs_fragment">Open LogsFragment</string>
+    <string name="app_name">LoggySample</string>
+    <string name="title_open_dashboard">Open Dashboard</string>
+    <string name="title_create_21_error_logs">Create 21 error logs</string>
+    <string name="title_clear_logs">Clear logs</string>
+    <string name="title_create_21_mixed_logs">Create 21 mixed logs</string>
 </resources>
