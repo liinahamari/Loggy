@@ -29,7 +29,7 @@ const val PAGE_CAPACITY = 20L
 class LogsPagingSource(private val recordInteractor: RecordInteractor, private val filterStates: List<FilterState>) : RxPagingSource<Int, LogUi>() {
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, LogUi>> =
         (if (filterStates.isEmpty()) {
-            recordInteractor.getEntireRecord(params.key ?: 0)
+            recordInteractor.getPagedRecord(params.key ?: 0)
         } else {
             recordInteractor.getFilteredRecord(params.key ?: 0, filterStates)
         })

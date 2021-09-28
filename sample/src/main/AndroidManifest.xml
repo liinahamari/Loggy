@@ -3,15 +3,17 @@
     package="dev.liinahamari.loggy_sdk.loggy">
 
     <application
+        android:name="dev.liinahamari.loggy_sdk.loggy.sample.Application"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name="dev.liinahamari.loggy_sdk.loggy.sample.Application"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LogsMonitor">
-        <activity android:name="dev.liinahamari.loggy_sdk.loggy.sample.screens.main.MainActivity">
+        <activity
+            android:name="dev.liinahamari.loggy_sdk.loggy.sample.screens.main.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

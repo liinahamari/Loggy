@@ -28,11 +28,11 @@ import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
 class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapper, private val baseComposers: BaseComposers, private val logBox: Box<Log>) {
-    fun getEntireRecord(page: Int): Single<GetRecordResult> = Single.fromCallable {
+    fun getPagedRecord(page: Int): Single<GetRecordResult> = Single.fromCallable {
         logBox.query()
             .order(Log_.timestamp)
             .build()
-            .find(if (page == 1) 0 else page * PAGE_CAPACITY, PAGE_CAPACITY)
+            .find(if (page == 0) 0 else page * PAGE_CAPACITY, PAGE_CAPACITY)
     }
         .map { it.map(logMapper::transform) }
         .map { if (it.isNotEmpty()) GetRecordResult.Success(it) else GetRecordResult.EmptyList }
@@ -59,7 +59,7 @@ class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapp
         }
         .compose(baseComposers.applySingleSchedulers())
 
-    fun clearEntireRecord(): Observable<ClearRecordResult> = Observable.fromAction<Unit> {
+    fun clearEntireRecord(): Observable<ClearRecordResult> = Observable.fromCallable {
         logBox.removeAll()
     }
         .map<ClearRecordResult> { ClearRecordResult.Success }
