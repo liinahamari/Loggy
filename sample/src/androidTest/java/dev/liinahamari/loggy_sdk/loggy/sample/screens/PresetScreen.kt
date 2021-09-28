@@ -18,10 +18,13 @@ package dev.liinahamari.loggy_sdk.loggy.sample.screens
 
 import dev.liinahamari.loggy_sdk.loggy.R
 import io.github.kakaocup.kakao.common.views.KView
+import io.github.kakaocup.kakao.edit.KEditText
 import io.github.kakaocup.kakao.screen.Screen
 
 open class PresetScreen : Screen<PresetScreen>() {
-    val create21errorLogBtn: KView = KView { withId(R.id.create21errorLogs) }
-    val create21mixedLogBtn: KView = KView { withId(R.id.create21mixedLogs) }
+    val amountOfLogsToGenerate: KEditText = KEditText  { withId(R.id.amountOfLogsToGenerateEt) }
+    val createInfoLogBtn: KView = KView { withId(R.id.createInfoLogs) }
+    val createErrorLogBtn: KView = KView { withId(R.id.createErrorLogs) }
+    val createMixedLogBtn: KView = KView { withId(R.id.createMixedLogs) }
     val openDashboardBtn: KView = KView { withId(R.id.openDashboardBtn) }
 }

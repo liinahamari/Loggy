@@ -28,7 +28,7 @@ import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
 class RecordInteractor @Inject constructor(private val logMapper: LogToLogUiMapper, private val baseComposers: BaseComposers, private val logBox: Box<Log>) {
-    fun getEntireRecord(page: Int): Single<GetRecordResult> = Single.fromCallable {
+    fun getPagedRecord(page: Int): Single<GetRecordResult> = Single.fromCallable {
         logBox.query()
             .order(Log_.timestamp)
             .build()

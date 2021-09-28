@@ -49,3 +49,10 @@ open class LogsRecyclerScreen : Screen<LogsRecyclerScreen>() {
         val stackTrace: KTextView = KTextView(parent) { withId(R.id.stacktraceTv) }
     }
 }
+
+fun KRecyclerView.paginateToEnd(pagesAmount: Int) {
+    for (i in 0 until pagesAmount) {
+        scrollToEnd()
+        Thread.sleep(500)
+    }
+}

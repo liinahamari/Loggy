@@ -22,7 +22,9 @@ import io.reactivex.rxjava3.core.ObservableTransformer
 import io.reactivex.rxjava3.core.SingleTransformer
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class BaseComposers @Inject constructor() {
     fun <T> applySingleSchedulers(errorLabel: String = "meta"): SingleTransformer<T, T> =
         SingleTransformer {

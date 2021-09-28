@@ -20,21 +20,29 @@ class PresetFragment : BaseFragment(R.layout.fragment_preset) {
     private val viewModel: MainViewModel by viewModels()
 
     override fun setupClicks() {
-        subscriptions += create21mixedLogs.clicks()
-            .throttleFirst()
+        subscriptions += createMixedLogs.clicks()
             .subscribe {
-                for (i in 1..21) {
+                val amount = amountOfLogsToGenerateEt.text.toString().toInt()
+                for (i in 1..amount) {
                     if (nextBoolean())
                         FlightRecorder.e("errorLog $i", IllegalArgumentException())
                     else
                         FlightRecorder.i { "infoLog $i" }
                 }
             }
-        subscriptions += create21errorLogs.clicks()
-            .throttleFirst()
+        subscriptions += createErrorLogs.clicks()
             .subscribe {
-                for (i in 1..21) {
-                    FlightRecorder.e("errorLog $i", IllegalArgumentException())
+                val amount = amountOfLogsToGenerateEt.text.toString().toInt()
+                for (i in 1..amount) {
+                    FlightRecorder.e("errorLog $i", IllegalArgumentException(), false)
+                }
+            }
+
+        subscriptions += createInfoLogs.clicks()
+            .subscribe {
+                val amount = amountOfLogsToGenerateEt.text.toString().toInt()
+                for (i in 1..amount) {
+                    FlightRecorder.i { "infoLog $i" }
                 }
             }
 
@@ -42,7 +50,8 @@ class PresetFragment : BaseFragment(R.layout.fragment_preset) {
             .throttleFirst()
             .subscribe {
                 requireActivity().supportFragmentManager.commit {
-                    replace(R.id.container, LogsFragment.newInstance())
+                    addToBackStack(this.javaClass.simpleName.toString())
+                    add(R.id.container, LogsFragment.newInstance())
                 }
             }
     }

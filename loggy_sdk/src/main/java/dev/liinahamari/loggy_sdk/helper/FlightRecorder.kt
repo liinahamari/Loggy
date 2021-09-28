@@ -131,6 +131,9 @@ object FlightRecorder : LogBoxInjector() {
                 } ?: logMessage.take(MESSAGE_LENGTH_THRESHOLD).plus("...") to logMessage.drop(MESSAGE_LENGTH_THRESHOLD)
         }
 
+    @VisibleForTesting
+    fun clearDb() = logBox.removeAll()
+
     enum class Priority {
         I,
         D,

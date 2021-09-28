@@ -31,10 +31,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-private const val ITERATIONS_AMOUNT = 100
+private const val ITERATIONS_AMOUNT = 1000
 
 @RunWith(AndroidJUnit4ClassRunner::class)
-class EraseLogsTest {
+class PaginationValidationTest {
     @Rule
     @JvmField
     val rule = ActivityScenarioRule(MainActivity::class.java)
@@ -46,77 +46,9 @@ class EraseLogsTest {
     @Before
     fun clearDb() = FlightRecorder.clearDb()
 
+    /** some == ITERATIONS_AMOUNT*/
     @Test
-    fun recyclerHas0LogsAtAll_afterClearButtonClicked_EmptyPlaceholderIsShown() {
-        onScreen<PresetScreen> {
-            openDashboardBtn.click()
-
-            onScreen<LogsRecyclerScreen> {
-                logsRecycler {
-                    isVisible()
-                    hasSize(0)
-                }
-                emptyLogsPlaceholder {
-                    isGone()
-                }
-                mainFab {
-                    isVisible()
-                    click()
-                }
-                clearLogsFab {
-                    isVisible()
-                    isFocusable()
-                    click()
-                }
-                logsRecycler {
-                    isGone()
-                }
-                emptyLogsPlaceholder {
-                    isVisible()
-                }
-            }
-        }
-    }
-
-    @Test
-    fun recyclerHas_100_ErrorLogs_afterClearButtonClicked_RecyclerHasGoneAndEmptyPlaceholderIsShown() {
-        onScreen<PresetScreen> {
-            amountOfLogsToGenerate.clearText()
-            amountOfLogsToGenerate.typeText(ITERATIONS_AMOUNT.toString())
-            closeSoftKeyboard()
-            createErrorLogBtn.click()
-            openDashboardBtn.click()
-
-            onScreen<LogsRecyclerScreen> {
-                logsRecycler {
-                    isVisible()
-                    paginateToEnd(ITERATIONS_AMOUNT / PAGE_CAPACITY.toInt())
-                    hasSize(ITERATIONS_AMOUNT)
-                }
-                emptyLogsPlaceholder {
-                    isGone()
-                }
-                mainFab {
-                    isVisible()
-                    click()
-                }
-                clearLogsFab {
-                    isVisible()
-                    isFocusable()
-                    click()
-                }
-                logsRecycler {
-                    isGone()
-                }
-                emptyLogsPlaceholder {
-                    isVisible()
-                }
-            }
-        }
-    }
-
-    @Test
-    fun recyclerHas_100_InfoLogs_afterClearButtonClicked_RecyclerHasGoneAndEmptyPlaceholderIsShown() {
+    fun whenSomeInfoLogsAdded_thenInDashboardAllTheLogsPresented() {
         onScreen<PresetScreen> {
             amountOfLogsToGenerate.clearText()
             amountOfLogsToGenerate.typeText(ITERATIONS_AMOUNT.toString())
@@ -127,33 +59,40 @@ class EraseLogsTest {
             onScreen<LogsRecyclerScreen> {
                 logsRecycler {
                     isVisible()
+
                     paginateToEnd(ITERATIONS_AMOUNT / PAGE_CAPACITY.toInt())
+
                     hasSize(ITERATIONS_AMOUNT)
-                }
-                emptyLogsPlaceholder {
-                    isGone()
-                }
-                mainFab {
-                    isVisible()
-                    click()
-                }
-                clearLogsFab {
-                    isVisible()
-                    isFocusable()
-                    click()
-                }
-                logsRecycler {
-                    isGone()
-                }
-                emptyLogsPlaceholder {
-                    isVisible()
                 }
             }
         }
     }
 
+    /** some == ITERATIONS_AMOUNT*/
     @Test
-    fun recyclerHas_100_MixedLogs_afterClearButtonClicked_RecyclerHasGoneAndEmptyPlaceholderIsShown() {
+    fun whenSomeErrorLogsAdded_thenInDashboardAllTheLogsPresented() {
+        onScreen<PresetScreen> {
+            amountOfLogsToGenerate.clearText()
+            amountOfLogsToGenerate.typeText(ITERATIONS_AMOUNT.toString())
+            closeSoftKeyboard()
+            createErrorLogBtn.click()
+            openDashboardBtn.click()
+
+            onScreen<LogsRecyclerScreen> {
+                logsRecycler {
+                    isVisible()
+
+                    paginateToEnd(ITERATIONS_AMOUNT / PAGE_CAPACITY.toInt())
+
+                    hasSize(ITERATIONS_AMOUNT)
+                }
+            }
+        }
+    }
+
+    /** some == ITERATIONS_AMOUNT*/
+    @Test
+    fun whenSomeMixedLogsAdded_thenInDashboardAllTheLogsPresented() {
         onScreen<PresetScreen> {
             amountOfLogsToGenerate.clearText()
             amountOfLogsToGenerate.typeText(ITERATIONS_AMOUNT.toString())
@@ -164,26 +103,10 @@ class EraseLogsTest {
             onScreen<LogsRecyclerScreen> {
                 logsRecycler {
                     isVisible()
-                    paginateToEnd(ITERATIONS_AMOUNT/ PAGE_CAPACITY.toInt())
+
+                    paginateToEnd(ITERATIONS_AMOUNT / PAGE_CAPACITY.toInt())
+
                     hasSize(ITERATIONS_AMOUNT)
-                }
-                emptyLogsPlaceholder {
-                    isGone()
-                }
-                mainFab {
-                    isVisible()
-                    click()
-                }
-                clearLogsFab {
-                    isVisible()
-                    isFocusable()
-                    click()
-                }
-                logsRecycler {
-                    isGone()
-                }
-                emptyLogsPlaceholder {
-                    isVisible()
                 }
             }
         }
